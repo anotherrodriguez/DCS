@@ -11,5 +11,10 @@ class Part extends Model
     {
         return $this->belongsTo('App\Customer');
     }
+
+    public function document()
+    {
+        return $this->hasMany('App\Part');
+    }
   
 }

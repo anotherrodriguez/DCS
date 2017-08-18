@@ -49,7 +49,7 @@ class DocumentController extends Controller
     public function show(Document $document)
     {
         //
-        $revisions = Document::with('revision','type')->whereIn('id', $document)->get();
+        $revisions = Document::with('revision','type','customer','part.customer')->find($document);
         return ['data'=>$revisions];
     }
 

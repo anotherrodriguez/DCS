@@ -15,8 +15,14 @@ class RevisionController extends Controller
     public function index()
     {
         //
+       
+
         $revisions = new Revision();
-        $revisions = $revisions->latestRevision()->get();
+
+       // $revisions = $revisions->with('document.part.customer','document.type','document.process');
+        $revisions = $revisions->latestRevision()->with('document')->get();
+
+
         return ['data'=>$revisions];
     }
 

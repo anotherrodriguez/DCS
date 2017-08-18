@@ -15,5 +15,18 @@ class Document extends Model
     function type() {
     	return $this->belongsTo('App\Type');
     }
+
+    function process() {
+    	return $this->belongsTo('App\Process');
+    }
+
+    function customer() {
+    	return $this->part();
+    }
+
+    function part() {
+    	return $this->belongsTo('App\Part');
+    }
+ 
  
 }
