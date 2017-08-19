@@ -17,7 +17,7 @@ Route::get('/', function () {
 
 Route::get('/test', function () {
 	$tableColumns = ['Document', 'Revision', 'Description', 'Customer'];
-	$dataColumns = ['document_number', 'revision', 'description', 'customer'];
+	$dataColumns = ['document.document_number', 'revision', 'description', 'document.part.customer.name'];
 
 	$columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
     return view('test', $columns);

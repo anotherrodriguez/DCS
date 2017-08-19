@@ -15,14 +15,11 @@ class RevisionController extends Controller
     public function index()
     {
         //
-       
-
         $revisions = new Revision();
-
-       // $revisions = $revisions->with('document.part.customer','document.type','document.process');
-        $revisions = $revisions->latestRevision()->with('document')->get();
-
-
+        $revisions = $revisions->latestRevision()->with('document.part.customer','document.process','document.type')->get();
+        foreach($revisions as $revision){
+            $revision['revision'] = '<a href="document/'.$revision['document']['id'].'">'.$revision['revision'].'</a>'; 
+        }
         return ['data'=>$revisions];
     }
 
