@@ -38,7 +38,7 @@
             }
         },
         ajax: {
-            url: '{{url("revisions")}}',
+            url: '{{url($url)}}',
             headers: {
                 'X-CSRF-Token': '{{ csrf_token() }}',
             },

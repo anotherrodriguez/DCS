@@ -49,8 +49,12 @@ class DocumentController extends Controller
     public function show(Document $document)
     {
         //
-        $revisions = Document::with('revision','type','part.customer')->find($document);
-        return ['data'=>$revisions];
+        $revisions = Document::with('revision','type','part.customer', 'process')->find($document);
+        $revision = $revisions[0]['revision'];
+        $revision[0]['customer'] = $revisions[0]['part']['customer']['name'];
+        $revision[0]['type'] = $revisions[0]['type']['name'];
+        $revision[0]['process'] = $revisions[0]['process']['name'];
+        return ['data'=>$revision];
     }
 
     /**
