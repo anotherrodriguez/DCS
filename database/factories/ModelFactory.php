@@ -87,4 +87,11 @@ $factory->define(App\Revision::class, function (Faker\Generator $faker) {
     ];
 });
 
+$factory->state(App\Revision::class, 'addRevision', function ($faker) {
+    return [
+        'document_id' => '1',
+        'user_id' => '1'
+    ];
+});
+
 

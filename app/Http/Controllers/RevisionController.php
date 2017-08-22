@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Revision;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RevisionController extends Controller
 {
@@ -15,10 +16,26 @@ class RevisionController extends Controller
     public function index()
     {
         //
+
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function revisionData()
+    {
+        //
         $revisions = new Revision();
         $revisions = $revisions->latestRevision()->with('document.part.customer','document.process','document.type')->get();
         foreach($revisions as $revision){
-            $revision['revision'] = '<a href="document/'.$revision['document']['id'].'">'.$revision['revision'].'</a>'; 
+            $revision['revision'] = '<a href="'.action('DocumentController@show', $revision['document']['id']).'">'.$revision['revision'].'</a>'; 
+            if (Auth::check()) {
+            // The user is logged in...       
+                $id = $revision['document']['id'];
+                $revision['edit'] = '<a href="'.action('DocumentController@edit', $id).'"><button type="button" class="btn btn-outline-primary">edit</button></a>';
+            }
         }
         return ['data'=>$revisions];
     }

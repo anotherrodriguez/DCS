@@ -33,9 +33,21 @@ body {
 
 #dataTable{
 	position: relative;
-    top: -25px;
+  top: -25px;
 }
 
 .dt-buttons{
 	padding: 0px 10px;
+}
+
+.containerMessage{
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  z-index: 1050;
+}
+
+.message{
+  position: relative;
+  right: 50%;
 }

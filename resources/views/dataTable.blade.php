@@ -15,6 +15,10 @@
         <tbody>
         </tbody>
     </table>
+
+    @if (Auth::check()) 
+           <a href="{{$createUrl}}"><button type="button" class="btn btn-outline-primary">Add New</button></a>
+@endif
     
 @endsection
 
@@ -38,7 +42,7 @@
             }
         },
         ajax: {
-            url: '{{url($url)}}',
+            url: '{{$url}}',
             headers: {
                 'X-CSRF-Token': '{{ csrf_token() }}',
             },
@@ -53,7 +57,6 @@
           @endforeach
         ]
     });
-
 
     $('#searchInput').keyup(function(){
         table.search($(this).val()).draw();

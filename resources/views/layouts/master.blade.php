@@ -10,25 +10,24 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-        <link rel="stylesheet" type="text/css" href="css/main.css" />
-        <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
-        <link rel="stylesheet" href="css/font-awesome-core.css">
-        <link rel="stylesheet" href="css/font-awesome-solid.css">
-        <link rel="stylesheet" href="css/font-awesome-regular.css">
-        <link rel="stylesheet" href="css/font-awesome-light.css">
-        <link rel="stylesheet" href="css/font-awesome-brands.css">
+        <link rel="stylesheet" type="text/css" href="{{url('css/main.css')}}" />
+        <link rel="stylesheet" type="text/css" href="{{url('css/bootstrap.css')}}" />
+        <link rel="stylesheet" href="{{url('css/font-awesome-core.css')}}">
+        <link rel="stylesheet" href="{{url('css/font-awesome-solid.css')}}">
+        <link rel="stylesheet" href="{{url('css/font-awesome-regular.css')}}">
+        <link rel="stylesheet" href="{{url('css/font-awesome-light.css')}}">
+        <link rel="stylesheet" href="{{url('css/font-awesome-brands.css')}}">
         @yield('css')
 
-        <script src="js/jquery.js" type="text/javascript"></script>
-        <script src="js/tether.js" type="text/javascript"></script>
-        <script src="js/bootstrap.js" type="text/javascript"></script>
+        <script src="{{url('js/jquery.js')}}" type="text/javascript"></script>
+        <script src="{{url('js/tether.js')}}" type="text/javascript"></script>
+        <script src="{{url('js/bootstrap.js')}}" type="text/javascript"></script>
         @yield('js')
 
-        <script defer src="js/packs/light.js"></script>
-        <script defer src="js/packs/regular.js"></script>
-        <script defer src="js/fontawesome.js"></script>
+        <script defer src="{{url('js/packs/light.js')}}"></script>
+        <script defer src="{{url('js/packs/regular.js')}}"></script>
+        <script defer src="{{url('js/fontawesome.js')}}"></script>
 
-        <!--<link rel="stylesheet" href="css/main.css"> -->
     </head>
 
     <body>
@@ -37,6 +36,13 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
+        @if (session('status'))
+            <div class="containerMessage">
+                <div class="alert alert-{{ session('status') }} message">
+                    {{ session('message') }}
+                </div>
+            </div>
+      @endif
         @include ('partials.navBar')
 
     <div class="container-fluid">

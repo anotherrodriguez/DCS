@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        factory(App\Revision::class, 5)->create();
+        factory(App\Revision::class, 5)->states('addRevision')->create();
 
     }
 }
