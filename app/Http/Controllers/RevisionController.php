@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Revision;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Traits\dataTables;
 
 class RevisionController extends Controller
 {
+    use dataTables;
+    
+        public function __construct()
+    {
+        $this->setControllerName('Revision');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +22,9 @@ class RevisionController extends Controller
     public function index()
     {
         //
-
+       $tableColumns = ['Document', 'Revision', 'Description', 'Customer'];
+       $dataColumns = ['document.document_number', 'revision', 'description', 'document.part.customer.name'];
+       return $this->dataTablesIndex($tableColumns, $dataColumns);
     }
 
     /**
@@ -24,20 +32,13 @@ class RevisionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function revisionData()
+    public function tableData()
     {
         //
         $revisions = new Revision();
         $revisions = $revisions->latestRevision()->with('document.part.customer','document.process','document.type')->get();
-        foreach($revisions as $revision){
-            $revision['revision'] = '<a href="'.action('DocumentController@show', $revision['document']['id']).'">'.$revision['revision'].'</a>'; 
-            if (Auth::check()) {
-            // The user is logged in...       
-                $id = $revision['document']['id'];
-                $revision['edit'] = '<a href="'.action('DocumentController@edit', $id).'"><button type="button" class="btn btn-outline-primary">edit</button></a>';
-            }
-        }
-        return ['data'=>$revisions];
+        return $this->dataTablesData($revisions);
+
     }
 
     /**

@@ -61,6 +61,9 @@
 
     <script>
         $(document).ready(function(){
+            @if (session('status'))
+                $( ".containerMessage" ).delay( 2400 ).fadeOut( 300 );
+            @endif
             @yield('javascript')
         });
     </script>

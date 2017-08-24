@@ -15,18 +15,32 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('revisions', 'RevisionController');
 
-Route::resource('document', 'DocumentController');
 
-Route::get('documentData/{document}', 'DocumentController@documentData');
+Route::get('tableData/{document}', 'DocumentController@tableData');
 
-Route::get('revisionData', 'RevisionController@revisionData');
+Route::get('revisionData', 'RevisionController@tableData');
 
-Route::get('customerData', 'CustomerController@customerData');
+Route::get('customerData', 'CustomerController@tableData');
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::get('partData', 'PartController@tableData');
+
+Route::get('typeData', 'TypeController@tableData');
+
+Route::get('processData', 'ProcessController@tableData');
+
+Route::resource('revisions', 'RevisionController');
+
+Route::resource('document', 'DocumentController');
+
+Route::resource('process', 'ProcessController');
+
 Route::resource('customers', 'CustomerController');
+
+Route::resource('parts', 'PartController');
+
+Route::resource('types', 'TypeController');

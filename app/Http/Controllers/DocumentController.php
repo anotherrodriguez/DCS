@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Document;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Traits\dataTables;
 
 class DocumentController extends Controller
 {
+    use dataTables;
+    
+        public function __construct()
+    {
+        $this->setControllerName('Document');
+    }    
     /**
      * Display a listing of the resource.
      *
@@ -16,18 +22,6 @@ class DocumentController extends Controller
     public function index()
     {
         //
-    $tableColumns = ['Document', 'Revision', 'Description', 'Customer'];
-    $dataColumns = ['document.document_number', 'revision', 'description', 'document.part.customer.name'];
-    if (Auth::check()) {
-            // The user is logged in...
-            $dataColumns[] = 'edit';
-            $tableColumns[] = 'edit';    
-            }
-    $url = action('RevisionController@revisionData');
-    $createUrl = action('DocumentController@create');
-    $title = 'Documents';
-    $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns, 'url' => $url, 'title' => $title, 'createUrl' => $createUrl];
-    return view('dataTable', $columns);
     }
 
     /**
@@ -62,7 +56,7 @@ class DocumentController extends Controller
         //
         $tableColumns = ['Revision', 'Description', 'Change', 'Date'];
         $dataColumns = ['revision', 'description', 'change_description', 'revision_date'];
-        $url = action('DocumentController@documentData', $document);
+        $url = action('DocumentController@tableData', $document);
         $title = 'Revision History';
         $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns, 'url' => $url, 'title' => $title];
         return view('document', $columns);
@@ -74,11 +68,11 @@ class DocumentController extends Controller
      * @param  \App\Document  $document
      * @return \Illuminate\Http\Response
      */
-    public function documentData(Document $document)
+    public function tableData(Document $document)
     {
         //
         $revisions = Document::with('revision','type','part.customer', 'process')->find($document);
-        $revision['data'] = $revisions[0]['revision'];
+        $revision = $this->dataTablesData($revisions[0]['revision']);
         $revision['summary']['document_number'] = $revisions[0]['document_number'];
         $revision['summary']['customer'] = $revisions[0]['part']['customer']['name'];
         $revision['summary']['type'] = $revisions[0]['type']['name'];

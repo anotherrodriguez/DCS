@@ -4,9 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Part;
 use Illuminate\Http\Request;
+use App\Traits\dataTables;
 
 class PartController extends Controller
 {
+    use dataTables;
+
+    function __construct() 
+    {
+        $this->setControllerName('Part');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +22,23 @@ class PartController extends Controller
     public function index()
     {
         //
+        $tableColumns = ['Part Number', 'Customer'];
+        $dataColumns = ['part_number', 'customer.name'];
+        return $this->dataTablesIndex($tableColumns, $dataColumns);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function tableData()
+    {
+        //
+        $parts = Part::with('customer')->get();
+        return $this->dataTablesData($parts);
+
     }
 
     /**

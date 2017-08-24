@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use \Illuminate\Database\QueryException;
+use App\Traits\dataTables;
 
 class CustomerController extends Controller
 {
+    use dataTables;
 
     /**
      * Create a new controller instance.
@@ -18,6 +19,7 @@ class CustomerController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['index','show','customerData']]);
+        $this->setControllerName('Customer');
     }
     
     /**
@@ -30,18 +32,7 @@ class CustomerController extends Controller
         //
         $tableColumns = ['Customer', 'Date Created'];
         $dataColumns = ['name', 'created_at'];
-        if (Auth::check()) {
-            // The user is logged in...
-            $tableColumns[] = 'Edit'; 
-            $tableColumns[] = 'Delete'; 
-            $dataColumns[] = 'edit';
-            $dataColumns[] = 'delete';   
-            }
-        $createUrl = action('CustomerController@create');
-        $url = action('CustomerController@customerData');
-        $title = 'Customers';
-        $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns, 'url' => $url, 'title' => $title, 'createUrl' => $createUrl];
-        return view('dataTable', $columns);
+        return $this->dataTablesIndex($tableColumns, $dataColumns);
     }
 
     /**
@@ -49,21 +40,11 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function customerData()
+    public function tableData()
     {
         //
         $customers = Customer::get();
-
-        if (Auth::check()) {
-            // The user is logged in...       
-            foreach($customers as $customer){
-                $id = $customer['id'];
-                $customer['edit'] = '<a href="'.action('CustomerController@edit', $id).'"><button type="button" class="btn btn-outline-warning">edit</button></a>';
-                $customer['delete'] = '<form action="'.action('CustomerController@destroy', $id).'" method="post">'.csrf_field().'<input name="_method" type="hidden" value="DELETE"><button type="submit" class="btn btn-outline-danger">delete</button></form>';
-            }
-        }
-
-        return ['data'=>$customers];
+        return $this->dataTablesData($customers);
     }
 
     /**

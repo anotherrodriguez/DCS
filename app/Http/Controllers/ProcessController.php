@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Process;
 use Illuminate\Http\Request;
+use \Illuminate\Database\QueryException;
+use App\Traits\dataTables;
 
 class ProcessController extends Controller
 {
+    use dataTables;
+
+    function __construct() 
+    {
+        $this->setControllerName('Process');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +23,22 @@ class ProcessController extends Controller
     public function index()
     {
         //
+        $tableColumns = ['Process', 'Date Created'];
+        $dataColumns = ['name', 'created_at'];
+        return $this->dataTablesIndex($tableColumns, $dataColumns);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function tableData()
+    {
+        //
+        $this->controllerName = 'Process';
+        $processes = Process::get();
+        return $this->dataTablesData($processes);
     }
 
     /**
@@ -25,6 +49,8 @@ class ProcessController extends Controller
     public function create()
     {
         //
+        $title = ['title' => 'New Process'];
+        return view('forms.process', $title);
     }
 
     /**
@@ -36,6 +62,11 @@ class ProcessController extends Controller
     public function store(Request $request)
     {
         //
+        $process = new Process([
+            'name' => $request->get('name')
+        ]);
+        $process->save();
+        return redirect('process')->with('status', 'success')->with('message', 'Process "'.$process->name.'" was added successfully.');
     }
 
     /**
@@ -58,6 +89,8 @@ class ProcessController extends Controller
     public function edit(Process $process)
     {
         //
+        $title = ['title' => 'Edit Process'];
+        return view('forms.processEdit', $process, $title);
     }
 
     /**
@@ -70,6 +103,11 @@ class ProcessController extends Controller
     public function update(Request $request, Process $process)
     {
         //
+        $oldName = $process->name;
+        $newName = $request->get('name');
+        $process->name =  $request->get('name');
+        $process->save();
+        return redirect('process')->with('status', 'success')->with('message', 'Process "'.$oldName.'" is now "'.$newName.'".');
     }
 
     /**
@@ -81,5 +119,17 @@ class ProcessController extends Controller
     public function destroy(Process $process)
     {
         //
+        try{
+            $process->delete();
+        }
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() === '23000'){
+                return redirect('process')->with('status', 'danger')->with('message', 'Process "'.$process->name.'" is linked, cannot be deleted.');
+            }
+
+        }
+        
+        return redirect('process')->with('status', 'success')->with('message', 'Process "'.$process->name.'" was deleted successfully.');
     }
 }

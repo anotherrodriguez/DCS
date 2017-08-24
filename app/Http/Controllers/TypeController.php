@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Type;
 use Illuminate\Http\Request;
+use \Illuminate\Database\QueryException;
+use App\Traits\dataTables;
 
 class TypeController extends Controller
 {
+    use dataTables;
+
+    function __construct() 
+    {
+        $this->setControllerName('Type');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +23,21 @@ class TypeController extends Controller
     public function index()
     {
         //
+        $tableColumns = ['Type', 'Date Created'];
+        $dataColumns = ['name', 'created_at'];
+        return $this->dataTablesIndex($tableColumns, $dataColumns);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function tableData()
+    {
+        //
+        $types = Type::get();
+        return $this->dataTablesData($types);
     }
 
     /**
@@ -25,6 +48,8 @@ class TypeController extends Controller
     public function create()
     {
         //
+        $title = ['title' => 'New Type'];
+        return view('forms.type', $title);
     }
 
     /**
@@ -36,6 +61,11 @@ class TypeController extends Controller
     public function store(Request $request)
     {
         //
+        $type = new Type([
+            'name' => $request->get('name')
+        ]);
+        $type->save();
+        return redirect('types')->with('status', 'success')->with('message', 'Type "'.$type->name.'" was added successfully.');
     }
 
     /**
@@ -58,6 +88,8 @@ class TypeController extends Controller
     public function edit(Type $type)
     {
         //
+        $title = ['title' => 'Edit Type'];
+        return view('forms.typeEdit', $type, $title);
     }
 
     /**
@@ -70,6 +102,11 @@ class TypeController extends Controller
     public function update(Request $request, Type $type)
     {
         //
+        $oldName = $type->name;
+        $newName = $request->get('name');
+        $type->name =  $request->get('name');
+        $type->save();
+        return redirect('types')->with('status', 'success')->with('message', 'Type "'.$oldName.'" is now "'.$newName.'".');
     }
 
     /**
@@ -81,5 +118,17 @@ class TypeController extends Controller
     public function destroy(Type $type)
     {
         //
+        try{
+            $type->delete();
+        }
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() === '23000'){
+                return redirect('types')->with('status', 'danger')->with('message', 'Type "'.$type->name.'" is linked, cannot be deleted.');
+            }
+
+        }
+        
+        return redirect('types')->with('status', 'success')->with('message', 'Type "'.$type->name.'" was deleted successfully.');
     }
 }
