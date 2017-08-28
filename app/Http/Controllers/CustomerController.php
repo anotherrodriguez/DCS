@@ -6,6 +6,7 @@ use App\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\dataTables;
+use \Illuminate\Database\QueryException;
 
 class CustomerController extends Controller
 {
@@ -18,7 +19,7 @@ class CustomerController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['index','show','customerData']]);
+        $this->middleware('auth', ['except' => ['index','show','tableData']]);
         $this->setControllerName('Customer');
     }
     
@@ -130,12 +131,23 @@ class CustomerController extends Controller
         }
         catch(QueryException $ex){
             //23000 Foriegn Key Exception aka already linked to another table
-            if($ex->getcode() === '23000'){
+            if($ex->getcode() == '23000'){
                 return redirect('customers')->with('status', 'danger')->with('message', 'Customer "'.$customer->name.'" is linked, cannot be deleted.');
             }
-
         }
-        
         return redirect('customers')->with('status', 'success')->with('message', 'Customer "'.$customer->name.'" was deleted successfully.');
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Customer  $customer
+     * @return \Illuminate\Http\Response
+     */
+    public static function listCustomers()
+    {
+        //
+        return Customer::all();
+    }
+
 }

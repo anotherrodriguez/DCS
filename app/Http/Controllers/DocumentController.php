@@ -56,9 +56,8 @@ class DocumentController extends Controller
         //
         $tableColumns = ['Revision', 'Description', 'Change', 'Date'];
         $dataColumns = ['revision', 'description', 'change_description', 'revision_date'];
-        $url = action('DocumentController@tableData', $document);
-        $title = 'Revision History';
-        $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns, 'url' => $url, 'title' => $title];
+        $columns = $this->addColumns($tableColumns, $dataColumns);
+        $columns['url'] = action('DocumentController@tableData', $document);
         return view('document', $columns);
     }
 

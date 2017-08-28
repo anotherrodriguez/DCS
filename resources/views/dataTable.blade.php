@@ -18,7 +18,7 @@
 
     @if (Auth::check()) 
            <a href="{{$createUrl}}"><button type="button" class="btn btn-outline-primary">Add New</button></a>
-@endif
+    @endif
     
 @endsection
 
@@ -53,7 +53,11 @@
         },
         columns:[
           @foreach ($dataColumns as $dataColumn)
-            {data:'{{$dataColumn}}'},
+            @if($dataColumn === 'edit' || $dataColumn === 'delete')
+                {data:'{{$dataColumn}}', orderable: false},
+            @else
+                {data:'{{$dataColumn}}'},
+            @endif
           @endforeach
         ]
     });

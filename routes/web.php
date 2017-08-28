@@ -33,6 +33,12 @@ Route::get('typeData', 'TypeController@tableData');
 
 Route::get('processData', 'ProcessController@tableData');
 
+Route::get('partTableData', 'PartController@partTableData');
+
+Route::get('selectPart', 'PartController@selectPart');
+
+Route::get('revisions/create/{part_id}', 'RevisionController@create');
+
 Route::resource('revisions', 'RevisionController');
 
 Route::resource('document', 'DocumentController');

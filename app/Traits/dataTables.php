@@ -13,18 +13,27 @@ trait dataTables
 
     protected function dataTablesIndex($tableColumns, $dataColumns)
     {
+        $columns = $this->addColumns($tableColumns, $dataColumns);
+        $columns['url'] = action($this->controllerName.'Controller@tableData');
+        $columns['title'] = $this->controllerName;
+        return view('dataTable', $columns);
+    }
+
+    protected function addColumns($tableColumns, $dataColumns)
+    {
         if (Auth::check()) {
             // The user is logged in...
-            $tableColumns[] = 'Edit'; 
-            $tableColumns[] = 'Delete'; 
+            $tableColumns[] = ''; 
+            $tableColumns[] = ''; 
             $dataColumns[] = 'edit';
             $dataColumns[] = 'delete';   
             }
-        $createUrl = action($this->controllerName.'Controller@create');
-        $url = action($this->controllerName.'Controller@tableData', 3);
-        $title = $this->controllerName;
-        $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns, 'url' => $url, 'title' => $title, 'createUrl' => $createUrl];
-        return view('dataTable', $columns);
+            $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
+            $columns['createUrl'] = action($this->controllerName.'Controller@create');
+            if($this->controllerName === 'Revision'){
+            $columns['createUrl'] = action('PartController@selectPart');
+            }
+            return $columns;
     }
 
     protected function dataTablesData($dataTables)
@@ -49,5 +58,16 @@ trait dataTables
 		}
 
         return ['data'=>$dataTables];
+    }
+
+        protected function listParts()
+    {
+        $tableColumns = ['Part Number', 'Customer', ''];
+        $dataColumns = ['part_number', 'customer.name', 'select'];
+        $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
+        $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
+        $columns['createUrl'] = action('PartController@create');
+        $columns['url'] = action('PartController@partTableData');
+        return view('dataTable', $columns);
     }
 }

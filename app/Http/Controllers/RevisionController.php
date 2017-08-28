@@ -46,9 +46,11 @@ class RevisionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($part_id)
     {
         //
+        $revision = new PartController();
+        return $revision->selectPart();
     }
 
     /**
