@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Revision;
 use Illuminate\Http\Request;
 use App\Traits\dataTables;
+use Illuminate\Support\Facades\Auth;
 
 class RevisionController extends Controller
 {
@@ -49,8 +50,11 @@ class RevisionController extends Controller
     public function create($part_id)
     {
         //
-        $revision = new PartController();
-        return $revision->selectPart();
+        $part =\App\Part::find($part_id);
+        $types = \App\Type::all();
+        $processes = \App\Process::all();
+        $data = ['part'=>$part, 'types'=>$types, 'processes'=>$processes];
+        return view('forms.revision', $data);
     }
 
     /**
@@ -62,6 +66,35 @@ class RevisionController extends Controller
     public function store(Request $request)
     {
         //
+        $part = \App\Part::find($request->get('part_id'));
+        $type = \App\Type::find($request->get('type_id'));
+        $process = \App\Process::find($request->get('process_id'));
+
+        $document = new \App\Document([
+            'document_number' =>  $request->get('document_number')
+            ]);
+
+        $document->part()->associate($part);
+        $document->type()->associate($type);
+        $document->process()->associate($process);
+
+        $document->save();
+
+        
+        $revision = new Revision([
+            'description' => $request->get('description'),
+            'revision_date' => $request->get('revision_date'),
+            'revision' => $request->get('revision'),
+            'change_description' => $request->get('change_description')
+        ]);
+        
+        $revision->document()->associate($document);
+
+        $revision->user()->associate(Auth::user());
+        
+        $revision->save();
+        
+        return redirect('revisions')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->document_number.'".');
     }
 
     /**
@@ -84,6 +117,13 @@ class RevisionController extends Controller
     public function edit(Revision $revision)
     {
         //
+        $revision = $revision::with('document','document.part','document.part.customer','document.type','document.process')->find($revision->id);
+        $types = \App\Type::all();
+        $processes = \App\Process::all();
+        $data = ['revision'=>$revision, 'types'=>$types, 'processes'=>$processes];
+
+        return view('forms.revisionEdit', $data);
+        
     }
 
     /**
@@ -96,6 +136,26 @@ class RevisionController extends Controller
     public function update(Request $request, Revision $revision)
     {
         //
+        $type = \App\Type::find($request->get('type_id'));
+        $process = \App\Process::find($request->get('process_id'));
+        $document = \App\Document::find($request->get('document_id'));
+
+        $document->document_number = $request->get('document_number');
+        $document->type()->associate($type);
+        $document->process()->associate($process);
+
+        $document->save();
+
+        $revision->description = $request->get('description');
+        $revision->revision_date = $request->get('revision_date');
+        $revision->revision = $request->get('revision');
+        $revision->change_description = $request->get('change_description');
+
+        $revision->user()->associate(Auth::user());
+        
+        $revision->save();
+        
+        return redirect('revisions')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was updated successfully to document "'.$document->document_number.'".');
     }
 
     /**

@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\DB;
 class Revision extends Model
 {
     //
+    protected $fillable = ['description', 'revision_date', 'revision', 'change_description'];
+
     function document() {
     	return $this->belongsTo('App\Document');
+    }
+
+    function user() {
+        return $this->belongsTo('App\User');
     }
 
     function latestRevision () {

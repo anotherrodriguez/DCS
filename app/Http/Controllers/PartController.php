@@ -40,6 +40,18 @@ class PartController extends Controller
         return $this->listParts();
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function partLinked($part)
+    {
+        //
+        $part = Part::with('customer')->where('id',$part)->first();
+        return $part;
+    }
+
 
     /**
      * Display a listing of the resource.
@@ -93,10 +105,12 @@ class PartController extends Controller
     public function store(Request $request)
     {
         //
+        $customer = \App\Customer::find($request->get('customer_id'));
+
         $part = new Part([
             'part_number' => $request->get('part_number'),
-            'customer_id' => $request->get('customer_id')
         ]);
+        $part->customer()->associate($customer);
         $part->save();
         return redirect('parts')->with('status', 'success')->with('message', 'Type "'.$part->part_number.'" was added successfully.');
     }

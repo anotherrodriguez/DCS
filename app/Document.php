@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Document extends Model
 {
     //
+    protected $fillable = ['document_number'];
+
     function revision() {
     	return $this->hasMany('App\Revision');
             }

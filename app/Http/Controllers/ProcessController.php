@@ -26,7 +26,7 @@ class ProcessController extends Controller
         $tableColumns = ['Process', 'Date Created'];
         $dataColumns = ['name', 'created_at'];
         return $this->dataTablesIndex($tableColumns, $dataColumns);
-    }
+    }   
 
     /**
      * Display a listing of the resource.

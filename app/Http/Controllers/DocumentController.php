@@ -70,13 +70,15 @@ class DocumentController extends Controller
     public function tableData(Document $document)
     {
         //
-        $revisions = Document::with('revision','type','part.customer', 'process')->find($document);
-        $revision = $this->dataTablesData($revisions[0]['revision']);
-        $revision['summary']['document_number'] = $revisions[0]['document_number'];
-        $revision['summary']['customer'] = $revisions[0]['part']['customer']['name'];
-        $revision['summary']['type'] = $revisions[0]['type']['name'];
-        $revision['summary']['process'] = $revisions[0]['process']['name'];
+        $revisions = $document->with('revision','type','part.customer', 'process')->find($document->id);
+        
+        $revision = $this->dataTablesData($revisions['revision']);
+        $revision['summary']['document_number'] = $revisions['document_number'];
+        $revision['summary']['customer'] = $revisions['part']['customer']['name'];
+        $revision['summary']['type'] = $revisions['type']['name'];
+        $revision['summary']['process'] = $revisions['process']['name'];
         return ['data'=>$revision['data'], 'summary'=>$revision['summary']];
+        
     }
 
     /**

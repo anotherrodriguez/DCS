@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Part extends Model
 {
     //
-	protected $fillable = ['part_number', 'customer_id'];
+	protected $fillable = ['part_number'];
 
     public function customer()
     {
