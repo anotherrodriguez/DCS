@@ -79,7 +79,7 @@
     var json = table.ajax.json();
     console.log(json);
     var summary = json.summary;
-    $('#documentNumber').html(summary.document_number);
+    $('#documentNumber').html(summary.operation);
     $('#type').html(summary.type);
     $('#process').html(summary.process);
     $('#customer').html(summary.customer);
@@ -91,5 +91,9 @@
     });
 
    $('#optionDropdown').append($('.dataTableButton'));
+
+   $('#deleteBtn').click(function(e){
+        e.preventDefault();
+   });
 
 @endsection

@@ -6,9 +6,9 @@
 	    <div class="form-group row">
 	    {{csrf_field()}}
 	      <input name="_method" type="hidden" value="PATCH">
-	      <label for="document_number" class="col-sm-2 col-form-label">Document</label>
+	      <label for="operation" class="col-sm-2 col-form-label">Operation</label>
 	      <div class="col-sm-10">
-	        <input type="text" name="document_number" class="form-control" id="document_number" value="{{$revision->document->document_number}}" required>
+	        <input type="text" name="operation" class="form-control" id="operation" value="{{$revision->document->operation}}" disabled>
 	        <input type="hidden" name="document_id" value="{{$revision->document->id}}">
 	      </div>
 	    </div>
@@ -21,14 +21,14 @@
 	    <div class="form-group row">
 	    	      <label for="part" class="col-sm-2 col-form-label">Part</label>
             <div class="col-sm-10">
-		        <input type="text" name="part" class="form-control" id="part" value="{{$revision->document->part->part_number}}" disabled>
-		        <input type="hidden" name="part_id" value="{{$revision->document->part->id}}">		        
+		        <input type="text" name="part_number" class="form-control" id="part" value="{{$revision->document->part->part_number}}" disabled>
+		        <input type="hidden" name="part_number" value="{{$revision->document->part->part_number}}">		        
              </div> 
         </div> 
  	    <div class="form-group row">
 	    	      <label for="type" class="col-sm-2 col-form-label">Document Type</label>
             <div class="col-sm-10">
-             <select name="type_id" class="form-control" required>
+             <select name="type_id" class="form-control" disabled>
                 <option value="">Select Type...</option>
               @foreach($types as $type)
                 @if($type['id'] === $revision['document']['type']['id'])
@@ -43,7 +43,7 @@
  	    <div class="form-group row">
 	      <label for="type" class="col-sm-2 col-form-label">Process</label>
 		    <div class="col-sm-10">
-		      <select name="process_id" class="form-control" required>
+		      <select name="process_id" class="form-control" disabled>
 		        <option value="">Select Process...</option>
 		      @foreach($processes as $process)
 		      	@if($process['id'] === $revision['document']['process']['id'])

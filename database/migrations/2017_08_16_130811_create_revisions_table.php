@@ -25,7 +25,7 @@ class CreateRevisionsTable extends Migration
         });
 
         Schema::table('revisions', function (Blueprint $table) {
-            $table->foreign('document_id')->references('id')->on('documents');
+            $table->foreign('document_id')->references('id')->on('documents')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users');
         });
     }

@@ -30,7 +30,7 @@ trait dataTables
             }
             $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
             $columns['createUrl'] = action($this->controllerName.'Controller@create');
-            if($this->controllerName === 'Revision'){
+            if($this->controllerName === 'Document'){
             $columns['createUrl'] = action('PartController@selectPart');
             }
             return $columns;
@@ -45,15 +45,16 @@ trait dataTables
             {
 		        $id = $dataTable['id'];
 		        $dataTable['edit'] = '<a href="'.action($this->controllerName.'Controller@edit', $id).'"><button type="button" class="btn btn-outline-warning">edit</button></a>';
-		        $dataTable['delete'] = '<form action="'.action($this->controllerName.'Controller@destroy', $id).'" method="post">'.csrf_field().'<input name="_method" type="hidden" value="DELETE"><button type="submit" class="btn btn-outline-danger">delete</button></form>';
+		        $dataTable['delete'] = '<form class="deleteForm" action="'.action($this->controllerName.'Controller@destroy', $id).'" method="post">'.csrf_field().'<input name="_method" type="hidden" value="DELETE"><button type="submit" class="btn btn-outline-danger deleteBtn">delete</button></form>';
             }
         }
 
-		if($this->controllerName === 'Revision')
+		if($this->controllerName === 'Document')
 		{
 			foreach($dataTables as $dataTable)
 			{
-				$dataTable['revision'] = '<a href="'.action('DocumentController@show', $dataTable['document']['id']).'">'.$dataTable['revision'].'</a>';
+				$dataTable['operation'] = '<a href="#">'.str_pad($dataTable['operation'], 3, '0', STR_PAD_LEFT).'</a>';
+                $dataTable['revision'] = '<a href="'.action('RevisionController@show', $dataTable['id']).'">'.$dataTable['revision'].'</a>';
 			}
 		}
 

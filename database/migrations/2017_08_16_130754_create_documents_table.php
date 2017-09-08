@@ -18,7 +18,7 @@ class CreateDocumentsTable extends Migration
             $table->integer('part_id')->unsigned();
             $table->integer('type_id')->unsigned();
             $table->integer('process_id')->unsigned();
-            $table->string('document_number');
+            $table->integer('operation');
             $table->timestamps();
         });
 

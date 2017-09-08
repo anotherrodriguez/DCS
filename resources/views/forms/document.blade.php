@@ -2,12 +2,12 @@
 
 @section ('content')
 <div class='col-lg-4'>
-	 <form method="post" action="{{action('RevisionController@store')}}">
+	 <form method="post" action="{{action('DocumentController@store')}}">
 	    <div class="form-group row">
 	    {{csrf_field()}}
-	      <label for="document_number" class="col-sm-2 col-form-label">Document</label>
+	      <label for="operation" class="col-sm-2 col-form-label">Operation</label>
 	      <div class="col-sm-10">
-	        <input type="text" name="document_number" class="form-control" id="document_number" placeholder="Document Number" required>
+	        <input type="text" name="operation" class="form-control" id="operation" placeholder="Operation Number" required>
 	      </div>
 	    </div>
 	    <div class="form-group row">

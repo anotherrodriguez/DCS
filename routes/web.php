@@ -17,9 +17,9 @@ Route::get('/', function () {
 
 
 
-Route::get('tableData/{document}', 'DocumentController@tableData');
+Route::get('documentData', 'DocumentController@tableData');
 
-Route::get('revisionData', 'RevisionController@tableData');
+Route::get('revisionData/{document}', 'RevisionController@tableData');
 
 Route::get('customerData', 'CustomerController@tableData');
 
@@ -37,11 +37,13 @@ Route::get('partTableData', 'PartController@partTableData');
 
 Route::get('selectPart', 'PartController@selectPart');
 
-Route::get('revisions/create/{part_id}', 'RevisionController@create');
+Route::get('documents/create/{part_id}', 'DocumentController@create');
+
+Route::get('revisions/create/{document_id}', 'RevisionController@create');
 
 Route::resource('revisions', 'RevisionController');
 
-Route::resource('document', 'DocumentController');
+Route::resource('documents', 'DocumentController');
 
 Route::resource('process', 'ProcessController');
 

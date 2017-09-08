@@ -67,7 +67,7 @@ $factory->define(App\Document::class, function (Faker\Generator $faker) {
         'process_id' => function () {
             return factory(App\Process::class)->create()->id;
         },
-        'document_number' => $faker->regexify('[A-Z]+[A-Z]-[0-9][0-9][0-9][0-9]+[A-Z]')
+        'operation' => $faker->randomDigit
     ];
 });
 
@@ -80,10 +80,10 @@ $factory->define(App\Revision::class, function (Faker\Generator $faker) {
         'user_id' => function () {
             return factory(App\User::class)->create()->id;
         },
-        'description' => $faker->text($maxNbChars = 200), 
+        'description' => $faker->text($maxNbChars = 100), 
         'revision_date' => $faker->date,
         'revision' => $faker->randomLetter, 
-        'change_description' => $faker->text($maxNbChars = 200) 
+        'change_description' => $faker->text($maxNbChars = 100) 
     ];
 });
 

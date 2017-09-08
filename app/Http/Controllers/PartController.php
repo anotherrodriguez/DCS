@@ -79,7 +79,7 @@ class PartController extends Controller
         foreach($parts as $part)
             {
                 $id = $part['id'];
-                $part['select'] = '<a href="'.url('revisions/create', $id).'"><button type="button" class="btn btn-outline-primary">select</button></a>';
+                $part['select'] = '<a href="'.url('documents/create', $id).'"><button type="button" class="btn btn-outline-primary">select</button></a>';
             }
         return ['data'=>$parts];
     }
