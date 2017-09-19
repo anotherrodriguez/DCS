@@ -6,6 +6,8 @@ use App\Revision;
 use Illuminate\Http\Request;
 use App\Traits\dataTables;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Response;
 
 class RevisionController extends Controller
 {
@@ -33,26 +35,19 @@ class RevisionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-/*    public function tableData()
+    public function tableData(Revision $revision)
     {
         //
-        $revisions = new Revision();
-        $revisions = $revisions->latestRevision()->with('document.part.customer','document.process','document.type')->get();
-        return $this->dataTablesData($revisions);
-
-    }
-*/
-    public function tableData(\App\Document $document)
-    {
-        //
-        $revisions = \App\Document::with('revision','type','part.customer', 'process')->find($document->id);
+        $revisions = $revision::with('document.part.customer','document.process','revisions_files_types.type')->find($revision->id);
         
-        $revision = $this->dataTablesData($revisions['revision']);
-        $revision['summary']['operation'] = $revisions['operation'];
-        $revision['summary']['customer'] = $revisions['part']['customer']['name'];
-        $revision['summary']['type'] = $revisions['type']['name'];
-        $revision['summary']['process'] = $revisions['process']['name'];
+
+        $revision = $this->dataTablesData($revisions['revisions_files_types'],true);
+        $revision['summary']['operation'] = $revisions['document']['operation'];
+        $revision['summary']['customer'] = $revisions['document']['part']['customer']['name'];
+        $revision['summary']['process'] = $revisions['document']['process']['name'];
         return ['data'=>$revision['data'], 'summary'=>$revision['summary']];
+        
+        
         
     }
 
@@ -64,10 +59,10 @@ class RevisionController extends Controller
     public function create($document)
     {
         //
-        $document = \App\Document::with('type','part.customer', 'process')->find($document);
+        $document = \App\Document::with('part.customer', 'process')->find($document);
         $types = \App\Type::all();
         $processes = \App\Process::all();
-        $data = ['document'=>$document, 'types'=>$types, 'processes'=>$processes];
+        $data = ['document'=>$document, 'processes'=>$processes, 'types'=>$types];
         return view('forms.revision', $data);
     }
 
@@ -80,6 +75,9 @@ class RevisionController extends Controller
     public function store(Request $request)
     {
         //
+        $files = $request->file('file');
+        $types = $request->get('type_id');
+
         $document = \App\Document::find($request->get('document_id'));
 
         $revision = new Revision([
@@ -94,8 +92,11 @@ class RevisionController extends Controller
         $revision->user()->associate(Auth::user());
         
         $revision->save();
+
+        $this->saveFiles($files,$types,$revision);
         
         return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->operation.'".');
+    
     }
 
     /**
@@ -104,17 +105,35 @@ class RevisionController extends Controller
      * @param  \App\Revision  $revision
      * @return \Illuminate\Http\Response
      */
-    public function show($document)
+    public function show(Revision $revision)
     {
         //
-        $document = \App\Document::find($document);
-        $tableColumns = ['Revision', 'Description', 'Change', 'Date'];
-        $dataColumns = ['revision', 'description', 'change_description', 'revision_date'];
+        //$document = \App\Document::find($document);
+        $tableColumns = ['Type', 'Date', ''];
+        $dataColumns = ['type.name', 'created_at', 'view'];
         $columns = $this->addColumns($tableColumns, $dataColumns);
-        $columns['url'] = action('RevisionController@tableData', $document);
-        $columns['createUrl'] = url('revisions/create', $document);
-        return view('document', $columns);
+        $columns['url'] = action('RevisionController@tableData', $revision);
+        $columns['createUrl'] = url('revisions/create', $revision);
+        return view('revision', $columns);
     }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Revision  $revision
+     * @return \Illuminate\Http\Response
+     */
+    public function showFile($file)
+    {
+        //
+        $file = \App\revisions_files_types::find($file);
+        $path = 'storage/'.$file['file_path'];
+        return Response::make(file_get_contents($path), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="test"'
+]);
+    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -125,10 +144,9 @@ class RevisionController extends Controller
     public function edit(Revision $revision)
     {
         //
-        $revision = $revision::with('document','document.part.customer','document.type','document.process')->find($revision->id);
-        $types = \App\Type::all();
+        $revision = $revision::with('document','document.part.customer','document.process')->find($revision->id);
         $processes = \App\Process::all();
-        $data = ['revision'=>$revision, 'types'=>$types, 'processes'=>$processes];
+        $data = ['revision'=>$revision, 'processes'=>$processes];
 
         return view('forms.revisionEdit', $data);
         

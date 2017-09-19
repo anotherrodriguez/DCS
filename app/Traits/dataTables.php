@@ -36,7 +36,7 @@ trait dataTables
             return $columns;
     }
 
-    protected function dataTablesData($dataTables)
+    protected function dataTablesData($dataTables, $viewColumns=false)
     {
         if (Auth::check()) 
         {
@@ -53,15 +53,23 @@ trait dataTables
 		{
 			foreach($dataTables as $dataTable)
 			{
-				$dataTable['operation'] = '<a href="#">'.str_pad($dataTable['operation'], 3, '0', STR_PAD_LEFT).'</a>';
-                $dataTable['revision'] = '<a href="'.action('RevisionController@show', $dataTable['id']).'">'.$dataTable['revision'].'</a>';
+				$dataTable['operation'] = '<a href="'.action('DocumentController@show', $dataTable['id']).'">'.str_pad($dataTable['operation'], 3, '0', STR_PAD_LEFT).'</a>';
+                $dataTable['revision'] = '<a href="'.action('RevisionController@show', $dataTable['revision_id']).'">'.$dataTable['revision'].'</a>';
 			}
 		}
+
+        if($viewColumns)
+        {
+            foreach($dataTables as $dataTable)
+            {
+                $dataTable['view'] = '<a target="_blank" href="'.action('RevisionController@showFile', $dataTable['id']).'"><button type="button" class="btn btn-outline-primary">view</button></a>';
+            }
+        }
 
         return ['data'=>$dataTables];
     }
 
-        protected function listParts()
+    protected function listParts()
     {
         $tableColumns = ['Part Number', 'Customer', ''];
         $dataColumns = ['part_number', 'customer.name', 'select'];
@@ -71,4 +79,21 @@ trait dataTables
         $columns['url'] = action('PartController@partTableData');
         return view('dataTable', $columns);
     }
+
+    protected function saveFiles($files,$types,$revision)
+    {
+        foreach($files as $key=>$file){
+            $filePath = $file->store('documents');
+            $type = \App\Type::find($types[$key]);
+
+            $revisions_files_types = new \App\revisions_files_types(['file_path'=>$filePath]);
+            $revisions_files_types->type()->associate($type);
+            $revisions_files_types->revision()->associate($revision);
+
+            $revisions_files_types->save();
+        }
+    }
+
+
+
 }

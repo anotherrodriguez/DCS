@@ -7,8 +7,7 @@
     <div class='col-lg-2 col-md-3 col-sm-4'>
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title"><span id='documentNumber'></span></h4>
-                <h6 class="card-subtitle mb-2 text-muted">Type: <span id='type'></span></h6>
+                <h4 class="card-title">Operation <span id='documentNumber'></span></h4>
                 <ul class="list-group">
                     <li class="list-group-item">Customer: <span id='customer'></span></li>
                     <li class="list-group-item">Process: <span id='process'></span></li>
@@ -64,7 +63,7 @@
         },
         columns:[
           @foreach ($dataColumns as $dataColumn)
-            @if($dataColumn === 'edit' || $dataColumn === 'delete')
+            @if($dataColumn === 'edit' || $dataColumn === 'delete' || $dataColumn === 'view')
                 {data:'{{$dataColumn}}', orderable: false},
             @else
                 {data:'{{$dataColumn}}'},
@@ -81,7 +80,6 @@
     $('#process').html(summary.process);
     $('#customer').html(summary.customer);
     } );
-
 
     $('#searchInput').keyup(function(){
         table.search($(this).val()).draw();

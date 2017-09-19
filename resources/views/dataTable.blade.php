@@ -4,6 +4,7 @@
 
 
 @section ('content')
+<div class="col-md-12">
         <table id='dataTable' class='display table' cellspacing='0' width='100%'>
         <thead id='dataTableHeader'>
             <tr>
@@ -40,6 +41,7 @@
               </div>
             </div>
     @endif
+  </div>
     
 @endsection
 

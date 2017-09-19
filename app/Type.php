@@ -8,8 +8,8 @@ class Type extends Model
 {
     //
 	protected $fillable = ['name'];
-	
-    function document() {
-    	return $this->belongsTo('App\Document');
+
+    function revisions_files_types() {
+        return $this->hasMany('App\revisions_files_types');
     }
 }

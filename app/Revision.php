@@ -18,12 +18,15 @@ class Revision extends Model
         return $this->belongsTo('App\User');
     }
 
-    function latestRevision () {
+    function latestRevision() {
     		return $this
             ->join(DB::raw("(SELECT `document_id`, MAX(`revision_date`) as `rev_date` FROM `revisions` GROUP BY `document_id`) AS `max_rev`"), function($join){
                 $join->on('max_rev.document_id', '=', 'revisions.document_id')->on('max_rev.rev_date', '=', 'revisions.revision_date');
             });
+    }
 
+    function revisions_files_types() {
+        return $this->hasMany('App\revisions_files_types');
     }
 }
 

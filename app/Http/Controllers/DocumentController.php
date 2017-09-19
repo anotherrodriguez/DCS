@@ -11,7 +11,7 @@ class DocumentController extends Controller
 {
     use dataTables;
     
-        public function __construct()
+    public function __construct()
     {
         $this->setControllerName('Document');
     }    
@@ -23,8 +23,8 @@ class DocumentController extends Controller
     public function index()
     {
         //
-       $tableColumns = ['Part', 'Operation', 'Revision', 'Type', 'Customer'];
-       $dataColumns = ['part.part_number', 'operation', 'revision', 'type.name', 'part.customer.name'];
+       $tableColumns = ['Part', 'Operation', 'Revision', 'Customer'];
+       $dataColumns = ['part.part_number', 'operation', 'revision', 'part.customer.name'];
        return $this->dataTablesIndex($tableColumns, $dataColumns);
     }
 
@@ -52,8 +52,9 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         //
+        $files = $request->file('file');
+        $types = $request->get('type_id');
         $part = \App\Part::find($request->get('part_id'));
-        $type = \App\Type::find($request->get('type_id'));
         $process = \App\Process::find($request->get('process_id'));
 
         $document = new Document([
@@ -61,17 +62,15 @@ class DocumentController extends Controller
             ]);
 
         $document->part()->associate($part);
-        $document->type()->associate($type);
         $document->process()->associate($process);
 
         $document->save();
 
-        
         $revision = new \App\Revision([
             'description' => $request->get('description'),
             'revision_date' => $request->get('revision_date'),
             'revision' => $request->get('revision'),
-            'change_description' => $request->get('change_description')
+            'change_description' => $request->get('change_description'),
         ]);
         
         $revision->document()->associate($document);
@@ -79,8 +78,11 @@ class DocumentController extends Controller
         $revision->user()->associate(Auth::user());
         
         $revision->save();
+
+        $this->saveFiles($files,$types,$revision);
         
         return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->operation.'".');
+        
     }
 
     /**
@@ -95,8 +97,10 @@ class DocumentController extends Controller
         $tableColumns = ['Revision', 'Description', 'Change', 'Date'];
         $dataColumns = ['revision', 'description', 'change_description', 'revision_date'];
         $columns = $this->addColumns($tableColumns, $dataColumns);
-        $columns['url'] = action('DocumentController@tableData', $document);
+        $columns['url'] = action('DocumentController@tableDataRevisions', $document);
+        $columns['createUrl'] = url('revisions/create', $document);
         return view('document', $columns);
+
     }
 
     /**
@@ -105,26 +109,23 @@ class DocumentController extends Controller
      * @param  \App\Document  $document
      * @return \Illuminate\Http\Response
      */
-/*    public function tableData(Document $document)
+    public function tableDataRevisions(Document $document)
     {
         //
-        $revisions = $document->with('revision','type','part.customer', 'process')->find($document->id);
-        
+        $this->setControllerName('Revision');
+        $revisions = $document->with('revision','part.customer', 'process')->find($document->id);
         $revision = $this->dataTablesData($revisions['revision']);
         $revision['summary']['operation'] = $revisions['operation'];
         $revision['summary']['customer'] = $revisions['part']['customer']['name'];
-        $revision['summary']['type'] = $revisions['type']['name'];
         $revision['summary']['process'] = $revisions['process']['name'];
         return ['data'=>$revision['data'], 'summary'=>$revision['summary']];
-        
     }
-    */
 
     public function tableData()
     {
         //
         $documents = new Document();
-        $documents = $documents->latestRevision()->with('part.customer','process','type')->get();
+        $documents = $documents->latestRevision()->with('part.customer','process')->get();
         return $this->dataTablesData($documents);
     }
 
@@ -137,10 +138,9 @@ class DocumentController extends Controller
     public function edit(Document $document)
     {
         //
-        $document = $document::with('part.customer','type','process')->find($document->id);
-        $types = \App\Type::all();
+        $document = $document::with('part.customer','process')->find($document->id);
         $processes = \App\Process::all();
-        $data = ['document'=>$document, 'types'=>$types, 'processes'=>$processes];
+        $data = ['document'=>$document, 'processes'=>$processes];
 
         return view('forms.documentEdit', $data);
     }
@@ -155,12 +155,10 @@ class DocumentController extends Controller
     public function update(Request $request, Document $document)
     {
         //
-        $type = \App\Type::find($request->get('type_id'));
         $process = \App\Process::find($request->get('process_id'));
         $document = $document->find($document->id);
 
         $document->operation = $request->get('operation');
-        $document->type()->associate($type);
         $document->process()->associate($process);
 
         $document->save();

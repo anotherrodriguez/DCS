@@ -15,11 +15,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-
 Route::get('documentData', 'DocumentController@tableData');
 
-Route::get('revisionData/{document}', 'RevisionController@tableData');
+Route::get('documentData/{document}', 'DocumentController@tableDataRevisions');
+
+Route::get('revisionData/{revision}', 'RevisionController@tableData');
+
+Route::get('revisions/file/{file}', 'RevisionController@showFile');
 
 Route::get('customerData', 'CustomerController@tableData');
 

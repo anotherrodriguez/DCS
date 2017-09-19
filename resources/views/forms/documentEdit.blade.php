@@ -26,21 +26,6 @@
              </div> 
         </div> 
  	    <div class="form-group row">
-	    	      <label for="type" class="col-sm-2 col-form-label">Document Type</label>
-            <div class="col-sm-10">
-             <select name="type_id" class="form-control">
-                <option value="">Select Type...</option>
-              @foreach($types as $type)
-                @if($type['id'] === $document['type']['id'])
-		        <option value={{$type->id}} selected>{{$type->name}}</option>
-		        @else
-		        <option value={{$type->id}}>{{$type->name}}</option>
-		        @endif
-              @endforeach
-              </select>
-              </div> 
-        </div> 
- 	    <div class="form-group row">
 	      <label for="type" class="col-sm-2 col-form-label">Process</label>
 		    <div class="col-sm-10">
 		      <select name="process_id" class="form-control">
