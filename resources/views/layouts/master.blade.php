@@ -46,7 +46,7 @@
         @include ('partials.navBar')
 
     <div class="container-fluid">
-        <div class="col-md-12">
+        <div class="row">
              @yield('content')
         </div>
 
@@ -62,7 +62,7 @@
     <script>
         $(document).ready(function(){
             @if (session('status'))
-                $( ".containerMessage" ).delay( 2400 ).fadeOut( 300 );
+                $( ".containerMessage" ).delay( 4800 ).fadeOut( 300 );
             @endif
             @yield('javascript')
         });

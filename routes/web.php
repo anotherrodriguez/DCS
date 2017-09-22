@@ -21,6 +21,10 @@ Route::get('documentData', 'DocumentController@tableData');
 
 Route::get('revisionData/{document}', 'RevisionController@tableData');
 
+Route::get('showFile/{revision}', 'RevisionController@showFile');
+
+Route::get('downloadFile/{file_revision}', 'RevisionController@downloadFile');
+
 Route::get('customerData', 'CustomerController@tableData');
 
 Auth::routes();
@@ -31,7 +35,21 @@ Route::get('partData', 'PartController@tableData');
 
 Route::get('typeData', 'TypeController@tableData');
 
+Route::get('fileData', 'FileController@tableData');
+
 Route::get('processData', 'ProcessController@tableData');
+
+Route::get('collectionData', 'CollectionController@tableData');
+
+Route::get('showCollectionData/{collection}', 'CollectionController@showTableData');
+
+Route::get('showAllCollectionData/{collection}', 'CollectionController@showAllTableData');
+
+Route::get('collections/add/{collection}', 'CollectionController@addDocumentsView');
+
+Route::post('collections/addDocument', 'CollectionController@addDocument');
+
+Route::post('collections/removeDocument', 'CollectionController@removeDocument');
 
 Route::get('partTableData', 'PartController@partTableData');
 
@@ -52,3 +70,7 @@ Route::resource('customers', 'CustomerController');
 Route::resource('parts', 'PartController');
 
 Route::resource('types', 'TypeController');
+
+Route::resource('files', 'FileController');
+
+Route::resource('collections', 'CollectionController');

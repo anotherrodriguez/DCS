@@ -6,6 +6,7 @@ use App\Document;
 use Illuminate\Http\Request;
 use App\Traits\dataTables;
 use Illuminate\Support\Facades\Auth;
+use \Illuminate\Database\QueryException;
 
 class DocumentController extends Controller
 {
@@ -23,8 +24,8 @@ class DocumentController extends Controller
     public function index()
     {
         //
-       $tableColumns = ['Part', 'Operation', 'Revision', 'Type', 'Customer'];
-       $dataColumns = ['part.part_number', 'operation', 'revision', 'type.name', 'part.customer.name'];
+       $tableColumns = ['Part', 'Document Number', 'Revision', 'Type', 'Customer'];
+       $dataColumns = ['part.part_number', 'document_number', 'revision', 'type.name', 'part.customer.name'];
        return $this->dataTablesIndex($tableColumns, $dataColumns);
     }
 
@@ -38,8 +39,9 @@ class DocumentController extends Controller
         //
         $part =\App\Part::find($part_id);
         $types = \App\Type::all();
+        $files = \App\File::all();
         $processes = \App\Process::all();
-        $data = ['part'=>$part, 'types'=>$types, 'processes'=>$processes];
+        $data = ['part'=>$part, 'types'=>$types, 'files'=>$files,'processes'=>$processes];
         return view('forms.document', $data);
     }
 
@@ -52,12 +54,14 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         //
+        $files = $request->file('file');
+        $fileTypes = $request->get('file_id');
         $part = \App\Part::find($request->get('part_id'));
         $type = \App\Type::find($request->get('type_id'));
         $process = \App\Process::find($request->get('process_id'));
 
         $document = new Document([
-            'operation' =>  $request->get('operation')
+            'document_number' =>  $request->get('document_number')
             ]);
 
         $document->part()->associate($part);
@@ -79,8 +83,10 @@ class DocumentController extends Controller
         $revision->user()->associate(Auth::user());
         
         $revision->save();
+
+        $this->saveFiles($files,$fileTypes,$revision);
         
-        return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->operation.'".');
+        return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->document_number.'".');
     }
 
     /**
@@ -111,7 +117,7 @@ class DocumentController extends Controller
         $revisions = $document->with('revision','type','part.customer', 'process')->find($document->id);
         
         $revision = $this->dataTablesData($revisions['revision']);
-        $revision['summary']['operation'] = $revisions['operation'];
+        $revision['summary']['document_number'] = $revisions['document_number'];
         $revision['summary']['customer'] = $revisions['part']['customer']['name'];
         $revision['summary']['type'] = $revisions['type']['name'];
         $revision['summary']['process'] = $revisions['process']['name'];
@@ -125,6 +131,13 @@ class DocumentController extends Controller
         //
         $documents = new Document();
         $documents = $documents->latestRevision()->with('part.customer','process','type')->get();
+        
+        foreach($documents as $document)
+        {
+            $document['document_number'] = '<a href="'.action('RevisionController@showFile', $document['revision_id']).'">'.$document['document_number'].'</a>';
+            $document['revision'] = '<a href="'.action('RevisionController@show', $document['id']).'">'.$document['revision'].'</a>';            
+        }
+
         return $this->dataTablesData($documents);
     }
 
@@ -159,12 +172,20 @@ class DocumentController extends Controller
         $process = \App\Process::find($request->get('process_id'));
         $document = $document->find($document->id);
 
-        $document->operation = $request->get('operation');
+        $document->document_number = $request->get('document_number');
         $document->type()->associate($type);
         $document->process()->associate($process);
 
-        $document->save();
-        
+        try{
+            $document->save();
+        }
+
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() == '23000'){
+                return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" of type "'.$type->name.'" already exists.');
+            }
+        }
         return redirect('documents')->with('status', 'success')->with('message', 'Document was updated successfully.');
     }
 
@@ -178,7 +199,7 @@ class DocumentController extends Controller
     {
         //
         $document->delete();
-        return redirect('documents')->with('status', 'success')->with('message', 'Document "'.$document->operation.'" was deleted successfully.');
+        return redirect('documents')->with('status', 'success')->with('message', 'Document "'.$document->document_number.'" was deleted successfully.');
 
     }
 }

@@ -49,19 +49,10 @@ trait dataTables
             }
         }
 
-		if($this->controllerName === 'Document')
-		{
-			foreach($dataTables as $dataTable)
-			{
-				$dataTable['operation'] = '<a href="#">'.str_pad($dataTable['operation'], 3, '0', STR_PAD_LEFT).'</a>';
-                $dataTable['revision'] = '<a href="'.action('RevisionController@show', $dataTable['id']).'">'.$dataTable['revision'].'</a>';
-			}
-		}
-
         return ['data'=>$dataTables];
     }
 
-        protected function listParts()
+    protected function listParts()
     {
         $tableColumns = ['Part Number', 'Customer', ''];
         $dataColumns = ['part_number', 'customer.name', 'select'];
@@ -71,4 +62,18 @@ trait dataTables
         $columns['url'] = action('PartController@partTableData');
         return view('dataTable', $columns);
     }
+     protected function saveFiles($files,$fileTypes,$revision)
+     {
+         foreach($files as $key=>$file){
+             $path = $file->store('public/documents');
+             $path = substr($path, 7); //stupid workaround
+             $fileType = \App\File::find($fileTypes[$key]);
+             $file_revision = new \App\file_revision(['path'=>$path]);
+             $file_revision->file()->associate($fileType);
+             $file_revision->revision()->associate($revision);
+ 
+             $file_revision->save();
+             
+         }
+     }
 }

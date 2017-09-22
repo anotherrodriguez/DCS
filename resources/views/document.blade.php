@@ -4,7 +4,7 @@
 
 
 @section ('content')
-<div class="row">
+
     <div class='col-lg-2 col-md-3 col-sm-4'>
         <div class="card">
             <div class="card-body">
@@ -35,7 +35,7 @@
     @endif
 
     </div>
-</div>
+
     
 @endsection
 
@@ -66,7 +66,7 @@
         },
         columns:[
           @foreach ($dataColumns as $dataColumn)
-            @if($dataColumn === 'edit' || $dataColumn === 'delete')
+            @if($dataColumn === 'edit' || $dataColumn === 'delete' || $dataColumn === 'download')
                 {data:'{{$dataColumn}}', orderable: false},
             @else
                 {data:'{{$dataColumn}}'},
@@ -79,7 +79,7 @@
     var json = table.ajax.json();
     console.log(json);
     var summary = json.summary;
-    $('#documentNumber').html(summary.operation);
+    $('#documentNumber').html(summary.document_number);
     $('#type').html(summary.type);
     $('#process').html(summary.process);
     $('#customer').html(summary.customer);

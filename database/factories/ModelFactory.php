@@ -67,7 +67,7 @@ $factory->define(App\Document::class, function (Faker\Generator $faker) {
         'process_id' => function () {
             return factory(App\Process::class)->create()->id;
         },
-        'operation' => $faker->randomDigit
+        'document_number' => $faker->regexify('[A-Z]+[A-Z]-[0-9][0-9][0-9][0-9]+[A-Z]')
     ];
 });
 

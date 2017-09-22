@@ -21,6 +21,12 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ action('TypeController@index') }}">Types</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ action('FileController@index') }}">Files</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ action('CollectionController@index') }}">Collections</a>
+          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options</a>
             <div class="dropdown-menu" id="optionDropdown" aria-labelledby="dropdown01">

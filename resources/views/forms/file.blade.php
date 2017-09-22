@@ -3,12 +3,12 @@
 @section ('content')
 <div class='col-md-3'></div>
  	<div class='col-md-6'>
-	 <form method="post" action="{{action('ProcessController@store')}}">
+	 <form method="post" action="{{action('FileController@store')}}">
 	    <div class="form-group row">
 	    {{csrf_field()}}
-	      <label for="customerName" class="col-sm-3 col-form-label">Process</label>
+	      <label for="customerName" class="col-sm-3 col-form-label">File Type</label>
 	      <div class="col-sm-9">
-	        <input type="text" name="name" class="form-control" id="processName" placeholder="Process Name">
+	        <input type="text" name="name" class="form-control" id="typeName" placeholder="Type Name">
 	      </div>
 	    </div>
 	    <div class="form-group row">
