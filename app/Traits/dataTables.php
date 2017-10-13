@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 trait dataTables
 {
@@ -59,13 +61,21 @@ trait dataTables
         $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
         $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
         $columns['createUrl'] = action('PartController@create');
+        $columns['title'] = 'Part';
         $columns['url'] = action('PartController@partTableData');
         return view('dataTable', $columns);
     }
      protected function saveFiles($files,$fileTypes,$revision)
      {
          foreach($files as $key=>$file){
-             $path = $file->store('public/documents');
+            if($fileTypes[$key] == 4)
+            {
+             $hashName = explode('.',$file->hashName())[0].'.SLDPRT';
+             $path = $file->storeAs('public/documents',$hashName);
+            }
+            else{
+                $path = $file->store('public/documents');
+            }
              $path = substr($path, 7); //stupid workaround
              $fileType = \App\File::find($fileTypes[$key]);
              $file_revision = new \App\file_revision(['path'=>$path]);
@@ -76,4 +86,21 @@ trait dataTables
              
          }
      }
+
+     protected function padCollection($collection_id)
+     {
+         return str_pad($collection_id,5,"0",STR_PAD_LEFT);
+     }
+
+    protected function deleteFileRevisions($filesToDelete)
+     {
+        foreach($filesToDelete as $fileToDelete)
+                {
+                    $file_revision = \App\File_Revision::find($fileToDelete);
+                    $path = 'public/'.$file_revision->path;
+                    Storage::delete($path);
+                    $file_revision->delete();
+                }
+     }
+
 }

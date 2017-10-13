@@ -5,8 +5,8 @@
 
 @section ('content')
 <div class="col-md-6">
-  <label for="">All Documents</label>
-        <table id='dataTableManage' class='display table' cellspacing='0' width='100%'>
+    <h1 for="">Collection <span id='collectionId'>{{$collectionIdDisplay}}</span></h1>
+        <table id='dataTable1' class='display table' cellspacing='0' width='100%'>
         <thead id='dataTableHeader'>
             <tr>
              @foreach ($tableColumns as $tableColumn)
@@ -19,8 +19,8 @@
     </table>
 </div>
 <div class="col-md-6">
-    <label for="">Collections</label>
-        <table id='dataTable1' class='display table' cellspacing='0' width='100%'>
+  <h1 for="">All Documents</h1>
+        <table id='dataTableManage' class='display table' cellspacing='0' width='100%'>
         <thead id='dataTableHeader'>
             <tr>
              @foreach ($tableColumns as $tableColumn)
@@ -36,6 +36,7 @@
 
 @section ('javascript')
     var options = {
+        dom: 'tr',
         ajax: {
             url: '{{$url}}',
             headers: {
@@ -60,6 +61,10 @@
     var table = $('#dataTable1').DataTable(options);
 
     options.ajax.url = '{{$urlAll}}';
+
+
+    console.log(options);
+
     var table1 = $('#dataTableManage').DataTable(options);
 
     $('tbody').on('click','.addBtn',function(e){
@@ -78,6 +83,10 @@
           table1.ajax.reload();
         });
   });
+
+      $('#searchInput').keyup(function(){
+        table1.search($(this).val()).draw();
+       });
 
       $('tbody').on('click','.removeBtn',function(e){
       id = $(this).attr('data-id');

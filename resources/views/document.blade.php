@@ -31,7 +31,7 @@
         </table>
 
     @if (Auth::check()) 
-           <a href="{{$createUrl}}"><button type="button" class="btn btn-outline-primary">Add New</button></a>
+          <div id="createNewRevision"> <a href="{{$createUrl}}"><button type="button" class="btn btn-outline-primary">Add New</button></a></div>
     @endif
 
     </div>

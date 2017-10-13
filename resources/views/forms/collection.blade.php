@@ -5,7 +5,6 @@
  	<div class='col-md-6'>
 	 <form method="post" action="{{action('CollectionController@store')}}" enctype="multipart/form-data">
 	    {{csrf_field()}}
-
  	    <div class="form-group row">
 	      <label for="type" class="col-sm-3 col-form-label">Process</label>
 		    <div class="col-sm-9">
@@ -16,6 +15,12 @@
 		      @endforeach
 		      </select>
 		     </div> 
+        </div> 
+                <div class="form-group row">
+	    	      <label for="description" class="col-sm-3 col-form-label">Description</label>
+            <div class="col-sm-9">
+	            <textarea class="form-control" name="description" placeholder="Description" required></textarea>
+             </div> 
         </div> 
 	   
 	    <div class="form-group row">

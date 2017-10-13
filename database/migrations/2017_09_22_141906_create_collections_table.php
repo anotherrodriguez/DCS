@@ -16,11 +16,14 @@ class CreateCollectionsTable extends Migration
         Schema::create('collections', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('process_id')->unsigned();
+             $table->longtext('description');      
+            $table->integer('user_id')->unsigned();    
             $table->timestamps();
         });
 
         Schema::table('collections', function (Blueprint $table) {
             $table->foreign('process_id')->references('id')->on('processes');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

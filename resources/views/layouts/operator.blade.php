@@ -43,18 +43,22 @@
                 </div>
             </div>
       @endif
-        @include ('partials.navBar')
+
+
+
+
+    <nav class="navbar navbar-toggleable-md navbar-light bg-faded fixed-top navbar-DCS">
+        @yield('title')
+    </nav> 
+
 
     <div class="container-fluid">
-        <div class="row">
-             @yield('content')
-        </div>
-
+            @yield('content')
     </div><!-- /.container -->
 
     <footer class="footer">
       <div class="container">
-        <p class="text-muted">Copyright  &copy; {{date("Y")}} Precision Gear Inc. All Rights Reserved.</p>
+        <p class="text-muted">Copyright  &copy; 2017 Precision Gear Inc. All Rights Reserved.</p>
       </div>
     </footer>
 

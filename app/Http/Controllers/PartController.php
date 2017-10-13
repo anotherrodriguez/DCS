@@ -93,6 +93,7 @@ class PartController extends Controller
     {
         //
         $customers['customers'] = CustomerController::listCustomers();
+        $customers['title'] = 'Part';
         return view('forms.part', $customers);
     }
 

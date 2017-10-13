@@ -8,9 +8,9 @@ class collection_document extends Model
 {
     //
     function collection() {
-    	return $this->belongsTo('App\Collection');
+    	return $this->belongsToMany('App\Collection');
     }
     function document() {
-    	return $this->belongsTo('App\Document');
+    	return $this->belongsToMany('App\Document');
     }
 }

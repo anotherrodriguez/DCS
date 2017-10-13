@@ -21,6 +21,12 @@
 		      </select>
 		     </div> 
         </div>    
+            <div class="form-group row">
+	    	      <label for="description" class="col-sm-3 col-form-label">Description</label>
+            <div class="col-sm-9">
+	            <textarea class="form-control" name="description" required>{{$collection['description']}}</textarea>
+             </div> 
+        </div> 
 	    <div class="form-group row">
 	      <div class="offset-sm-3 col-sm-9">
 	        <button type="submit" class="btn btn-primary">Update</button>

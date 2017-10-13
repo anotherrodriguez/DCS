@@ -38,10 +38,10 @@ class DocumentController extends Controller
     {
         //
         $part =\App\Part::find($part_id);
-        $types = \App\Type::all();
-        $files = \App\File::all();
-        $processes = \App\Process::all();
-        $data = ['part'=>$part, 'types'=>$types, 'files'=>$files,'processes'=>$processes];
+        $types = \App\Type::orderBy('name')->get();
+        $files = \App\File::orderBy('name')->get();
+        $processes = \App\Process::orderBy('name')->get();
+        $data = ['part'=>$part, 'types'=>$types, 'files'=>$files,'processes'=>$processes, 'title'=>'Part'];
         return view('forms.document', $data);
     }
 
@@ -151,9 +151,9 @@ class DocumentController extends Controller
     {
         //
         $document = $document::with('part.customer','type','process')->find($document->id);
-        $types = \App\Type::all();
-        $processes = \App\Process::all();
-        $data = ['document'=>$document, 'types'=>$types, 'processes'=>$processes];
+        $types = \App\Type::orderBy('name')->get();
+        $processes = \App\Process::orderBy('name')->get();
+        $data = ['document'=>$document, 'types'=>$types, 'processes'=>$processes, 'title'=>'document'];
 
         return view('forms.documentEdit', $data);
     }
@@ -198,7 +198,16 @@ class DocumentController extends Controller
     public function destroy(Document $document)
     {
         //
-        $document->delete();
+        try{
+            $document->delete();
+        }
+
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() == '23000'){
+                return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" has multiple revisions.');
+            }
+        }
         return redirect('documents')->with('status', 'success')->with('message', 'Document "'.$document->document_number.'" was deleted successfully.');
 
     }

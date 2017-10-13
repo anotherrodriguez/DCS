@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Collection;
 use Illuminate\Http\Request;
 use \Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 use App\Traits\dataTables;
+
 
 class CollectionController extends Controller
 {
@@ -24,8 +26,8 @@ class CollectionController extends Controller
     public function index()
     {
         //
-        $tableColumns = ['Collection', 'Process', 'Date Created'];
-        $dataColumns = ['collection_id', 'process.name', 'created_at'];
+        $tableColumns = ['Collection', 'Process', 'Description', 'Date Created', 'User'];
+        $dataColumns = ['collection_id', 'process.name', 'description', 'created_at', 'user.name'];
         return $this->dataTablesIndex($tableColumns, $dataColumns);
     }
 
@@ -37,10 +39,10 @@ class CollectionController extends Controller
     public function tableData()
     {
         //
-        $collections = Collection::with('process')->get();
+        $collections = Collection::with('process','user')->get();
         foreach($collections as $collection)
         {
-            $collection['collection_id'] = '<a href="'.action('CollectionController@show', $collection['id']).'">'.$collection['id'].'</a>';
+            $collection['collection_id'] = '<a href="'.action('CollectionController@show', $collection['id']).'">'.$this->padCollection($collection['id']).'</a>';
         }
         return $this->dataTablesData($collections);
     }
@@ -53,8 +55,8 @@ class CollectionController extends Controller
     public function create()
     {
         //
-        $processes = \App\Process::all();
-        $data = ['processes'=>$processes];
+        $processes = \App\Process::orderBy('name','asc')->get();
+        $data = ['processes'=>$processes, 'title'=>'Collection'];
         return view('forms.collection', $data);
     }
 
@@ -72,6 +74,8 @@ class CollectionController extends Controller
        $columns['url'] = action('CollectionController@showTableData', $collection);
        $columns['urlAll'] = action('CollectionController@showAllTableData', $collection);
        $columns['collectionId'] = $collection->id;
+       $columns['title'] = 'Collection';
+       $columns['collectionIdDisplay'] = $this->padCollection($collection->id);
         return view('manageCollection', $columns);
     }
 
@@ -107,11 +111,12 @@ class CollectionController extends Controller
     {
         //
         $process = \App\Process::find($request->get('process_id'));
-        $collection = new Collection();
+        $collection = new Collection(['description' => $request->get('description')]);
         $collection->process()->associate($process);
+        $collection->user()->associate(Auth::user());
         $collection->save();
 
-        return redirect('collections')->with('status', 'success')->with('message', 'New Collection "'.$collection->id.'" was added successfully.');
+        return redirect('collections')->with('status', 'success')->with('message', 'New Collection "'.$this->padCollection($collection->id).'" was added successfully.');
     }
 
     /**
@@ -128,7 +133,28 @@ class CollectionController extends Controller
        $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
        $columns['url'] = action('CollectionController@showTableData', $collection);
        $columns['createUrl'] = action('CollectionController@addDocumentsView', $collection);
+       $columns['title'] = 'Collection';
        return view('collectionDataTable', $columns);
+    }
+
+        public function showOperator(Request $request)
+    {
+        //
+       $collection = Collection::find($request->get('collection'));
+
+       if(empty($collection))
+       {
+        return redirect('/view')->with('status', 'danger')->with('message', 'Tech Number does not exist.');
+       }
+
+       $tableColumns = [ 'Type', 'Revision'];
+       $dataColumns = ['typeBtn', 'revision'];
+       $columns = ['tableColumns' => $tableColumns, 'dataColumns' => $dataColumns];
+       $columns['url'] = action('CollectionController@showTableData', $collection);
+       $columns['collectionId'] = $collection->id;
+       $columns['collectionIdDisplay'] = $this->padCollection($request->get('collection'));
+       $columns['change_request'] = \App\change_request::all();
+       return view('operatorResults', $columns);
     }
 
     public function showTableData(Collection $collection)
@@ -141,6 +167,7 @@ class CollectionController extends Controller
         $documents = new \App\Document();
         $temp = $documents->latestRevision()->with('type')->find($document->document_id);
         $temp['addBtn'] = '<button type="button" data-id="'.$document->id.'" class="btn btn-outline-danger removeBtn">remove</button>';
+        $temp['typeBtn'] = '<a target="_blank" href="'.action('RevisionController@showFile', $temp->revision_id).'"><button type="button" class="btn btn-outline-primary">'.$temp->type->name.'</button></a>';
         $latestRevision[] = $temp;
        }
         return ['data'=>$latestRevision];
@@ -181,7 +208,7 @@ class CollectionController extends Controller
         //
         $collection = $collection::with('process')->find($collection->id);
         $processes = \App\Process::all();
-        $data = ['collection'=>$collection, 'processes'=>$processes];
+        $data = ['collection'=>$collection, 'processes'=>$processes, 'title'=>'Collection'];
 
         return view('forms.collectionEdit', $data);
     }
@@ -198,7 +225,9 @@ class CollectionController extends Controller
         //
         $process = \App\Process::find($request->get('process_id'));
         $collection = $collection->find($collection->id);
+        $collection->description = $request->get('description');
         $collection->process()->associate($process);
+        $collection->user()->associate(Auth::user());
         $collection->save();
         
 

@@ -75,10 +75,10 @@ class RevisionController extends Controller
     {
         //
         $document = \App\Document::with('type','part.customer', 'process')->find($document);
-        $types = \App\Type::all();
-        $files = \App\File::all();
-        $processes = \App\Process::all();
-        $data = ['document'=>$document, 'types'=>$types, 'files'=>$files, 'processes'=>$processes];
+        $types = \App\Type::orderBy('name')->get();
+        $files = \App\File::orderBy('name')->get();
+        $processes = \App\Process::orderBy('name')->get();
+        $data = ['document'=>$document, 'types'=>$types, 'files'=>$files, 'processes'=>$processes, 'title'=>'Revision'];
         return view('forms.revision', $data);
     }
 
@@ -128,6 +128,7 @@ class RevisionController extends Controller
         $columns = $this->addColumns($tableColumns, $dataColumns);
         $columns['url'] = action('RevisionController@tableData', $document);
         $columns['createUrl'] = url('revisions/create', $document);
+        $columns['title'] = 'Revision';
         return view('document', $columns);
     }
 
@@ -159,9 +160,14 @@ class RevisionController extends Controller
     {
         //
 
+        
+        $file = $file_revision::with('revision.document')->find($file_revision->id);
         $pathToFile = 'storage/'.$file_revision->path;
-
-        return response()->download($pathToFile);
+        $ext = '.'.explode('.',$pathToFile)[1];
+        $document_number = $file->revision->document->document_number;
+        $revision = $file->revision->revision;
+        $name =  $document_number.', Rev '.$revision.$ext;
+        return response()->download($pathToFile,$name);
     }    
 
     /**
@@ -173,13 +179,13 @@ class RevisionController extends Controller
     public function edit(Revision $revision)
     {
         //
+
         $revision = $revision::with('document','document.part.customer','document.type','document.process', 'file_revision.file')->find($revision->id);
-        $types = \App\Type::all();
-        $files = \App\File::all();
-        $processes = \App\Process::all();
-        $data = ['revision'=>$revision, 'types'=>$types,'files'=>$files, 'processes'=>$processes];
-        return $revision;
-        //return view('forms.revisionEdit', $data);
+        $types = \App\Type::orderBy('name')->get();
+        $files = \App\File::orderBy('name')->get();
+        $processes = \App\Process::orderBy('name')->get();
+        $data = ['revision'=>$revision, 'types'=>$types,'files'=>$files, 'processes'=>$processes, 'title'=>'Revision'];
+        return view('forms.revisionEdit', $data);
         
     }
 
@@ -193,16 +199,33 @@ class RevisionController extends Controller
     public function update(Request $request, Revision $revision)
     {
         //
+
+        $files = $request->file('file');        
+        $fileTypes = $request->get('file_id');
+        $filesToDelete = $request->get('filesToDelete');
         $part_number = $request->get('part_number'); 
         $revision->description = $request->get('description');
         $revision->revision_date = $request->get('revision_date');
         $revision->revision = $request->get('revision');
         $revision->change_description = $request->get('change_description');
 
+        if(!empty($filesToDelete))
+        {
+            $this->deleteFileRevisions($filesToDelete);
+
+        }
+
         $revision->user()->associate(Auth::user());
         
         $revision->save();
+        if(!empty($files))
+        {
+             $this->saveFiles($files,$fileTypes,$revision);
+         }
+
         return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was updated successfully for '.$part_number);
+    
+        
     }
 
     /**
@@ -214,7 +237,32 @@ class RevisionController extends Controller
     public function destroy(Revision $revision)
     {
         //
-        $revision->delete();
+        $numberOfRevisions = $revision->where('document_id','=',$revision->document_id)->count();
+
+
+            $file_revisions = \App\File_Revision::where('revision_id','=',$revision->id)->select('id')->get();
+            foreach($file_revisions as $file_revision)
+            {
+                $filesToDelete[] = $file_revision->id;
+            }
+            $this->deleteFileRevisions($filesToDelete);
+
+            $revision->delete();
+
+            if($numberOfRevisions === 1){
+                $document = \App\Document::find($revision->document_id);
+                try{
+                $document->delete();
+                }
+
+                catch(QueryException $ex){
+                    //23000 Foriegn Key Exception aka already linked to another table
+                    if($ex->getcode() == '23000'){
+                        return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" has multiple links.');
+                    }
+                }
+
+            }
         return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was deleted successfully.');
     }
 }

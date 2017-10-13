@@ -18,7 +18,9 @@
     </table>
 
     @if (Auth::check()) 
+      @if($createUrl!==0)
            <a href="{{$createUrl}}"><button type="button" class="btn btn-outline-primary">Add New</button></a>
+      @endif
             <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
               <div class="modal-dialog" role="document">
@@ -30,7 +32,6 @@
                     </button>
                   </div>
                   <div class="modal-body">
-                    <p>Deleting this document will delete all associated revisions.</p>
                     <p>This action cannot be undone.</p>
                   </div>
                   <div class="modal-footer">
@@ -49,8 +50,8 @@
         fixedHeader: {
             headerOffset: 55
         },
-        pageLength: -1,
-        dom: 'Btr',
+        pageLength: 12,
+        dom: 'Btrip',
 
         buttons: {
             dom: {

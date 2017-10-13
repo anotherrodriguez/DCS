@@ -3,10 +3,37 @@
 @section ('content')
 <div class='col-md-3'></div>
  	<div class='col-md-6'>
-	 <form method="post" action="{{action('RevisionController@update', $revision['id'])}}">
+	 <form method="post" action="{{action('RevisionController@update', $revision['id'])}}" enctype="multipart/form-data">
 	    {{csrf_field()}}
 	      <input name="_method" type="hidden" value="PATCH">
-	<div id="files">
+
+		<div class="files">
+ 	    <div class="form-group row">
+	    	      <label for="type" class="col-sm-3 col-form-label">Linked File Type</label>
+            <div class="col-sm-6">
+				<table class="table table-sm table-bordered">
+				  <tbody>
+				    
+				@foreach($revision['file_revision'] as $file_revision) 
+				  <tr><td><a  target="_blank"  href="{{action('RevisionController@showFile', $file_revision->revision_id)}}"><button type="button" class="btn btn-outline-primary">{{$file_revision['file']['name']}}</button></a></td><td>delete <input type="checkbox" name="filesToDelete[]" value="{{ $file_revision->id}}" aria-label="Checkbox for following text input"></td></tr>
+				  @endforeach
+				    
+				  </tbody>
+				</table>
+			</div>
+		</div>
+        <hr>
+	</div>
+	<div class="form-group row fileDropDownContainer">
+        <div class="col-sm-12" id="fileDropDown" data-state="closed">
+        <span>add file</span>
+        <i class="fal fa-chevron-square-down"></i>
+        </div> 
+    </div>
+
+
+
+		<div id="files">
 	    <div class="form-group row">
 	      <label for="file" class="col-sm-3 col-form-label">File</label>
 	      <div class="col-sm-9">
@@ -26,17 +53,19 @@
              <select name="file_id[]" class="form-control" required>
                 <option value="">Select File Type...</option>
               @foreach($files as $file)
-                @if($file['id'] === $revision['document']['type']['id'])
-		        <option value={{$file->id}} selected>{{$file->name}}</option>
-		        @else
-		        <option value={{$file->id}}>{{$file->name}}</option>
-		        @endif
+                <option value={{$file->id}}>{{$file->name}}</option>
               @endforeach
               </select>
               </div> 
         </div>
         <hr> 
 	</div>
+
+
+
+
+
+
 	    <div class="form-group row">
 	      <label for="document_number" class="col-sm-3 col-form-label">Document Number</label>
 	      <div class="col-sm-9">
@@ -119,3 +148,43 @@
 	  </form>
 </div>
 @endsection
+
+@section('javascript')
+
+	var file = '<div id="files">'+$('#files').html()+'</div>';
+	$('#files').remove();
+
+ 	$('form').on('click', '#addFile', function(){
+ 		var documentType = '<div class="form-group row documentType">'+$('.documentType').html()+'</div><hr>';
+ 		
+ 		var fileButton ='<div class="col-sm-8"><input type="file" name="file[]" class="form-control-file" required></div>';
+ 		
+ 		var removeFile = '<div class="removeFile col-sm-1"><i class="fal fa-file-minus"></i></div>';
+ 		
+ 		var fileHtml = '<div class="form-group row"><label for="file" class="col-sm-3 col-form-label">File</label><div class="col-sm-9"><div class="row">'+fileButton+removeFile+'</div></div></div>';
+ 
+ 		$('#files').append('<div class="newFile">'+fileHtml+documentType+'</div>');
+ 	});
+ 
+ 	$('form').on('click', '.removeFile', function(){
+ 		$(this).closest('.newFile').remove();
+ 	});
+
+ 	$('#fileDropDown').click(function(){
+ 		var state = $(this).attr('data-state');
+
+ 		if(state==='closed'){
+ 		       $(this).html('<span>remove file </span><i class="fal fa-chevron-square-down"></i>');
+ 		       	console.log(file);
+ 		       $('.fileDropDownContainer').after(file);
+ 		       $(this).attr('data-state','open');
+ 		}
+
+ 		else{
+ 			$(this).html('<span>add file </span><i class="fal fa-chevron-square-up"></i>');
+ 			$('#files').remove();
+ 			$(this).attr('data-state','closed');
+ 		}
+
+ 	});
+ @endsection
