@@ -12,4 +12,8 @@ class File extends Model
 	function file_revision() {
         return $this->hasMany('App\File_Revision');
     }
+
+	function revision() {
+        return $this->belongsTo('App\Revision');
+    }
 }

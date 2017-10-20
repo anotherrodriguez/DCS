@@ -30,4 +30,8 @@ class Revision extends Model
         return $this->hasMany('App\File_Revision');
     }
 
+    function file() {
+        return $this->hasMany('App\File');
+    }    
+
 }

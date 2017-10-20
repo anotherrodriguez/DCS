@@ -2,7 +2,6 @@
 
 @include ('partials.dataTables')
 
-
 @section ('content')
 <div class="col-md-12">
         <table id='dataTable' class='display table' cellspacing='0' width='100%'>
@@ -50,7 +49,7 @@
         fixedHeader: {
             headerOffset: 55
         },
-        pageLength: 12,
+        pageLength: 15,
         dom: 'Btrip',
 
         buttons: {
@@ -88,6 +87,43 @@
     $('#searchInput').keyup(function(){
         table.search($(this).val()).draw();
     });
+
+    $('#searchButton').click(function(){
+        $('.showFilter').toggle();
+    });
+
+    $('#entries').change(function(){
+      var numEntries = $(this).val();
+      table.page.len(numEntries).draw();
+    });
+
+
+    $('#customerFilter').change(function(){
+        var customer = $(this).val();
+
+        if(customer==='allCustomers')
+        {
+           table.column(4).search('').draw();
+        }
+        else
+        {
+           table.column(4).search(customer).draw();
+        }
+    });
+
+    $('#typeFilter').change(function(){
+        var type = $(this).val();
+
+        if(type==='allTypes')
+        {
+           table.column(3).search('').draw();
+        }
+        else
+        {
+           table.column(3).search(type).draw();
+        }
+    });
+
 
    $('#optionDropdown').append($('.dataTableButton'));
 

@@ -32,12 +32,17 @@
         </div>
         <hr> 
 	</div>
-	    <div class="form-group row">
-	      <label for="document_number" class="col-sm-3 col-form-label">Document Number</label>
-	      <div class="col-sm-9">
-	        <input type="text" name="document_number" class="form-control" id="document_number" placeholder="Document Number" required>
-	      </div>
-	    </div>
+ 	    <div class="form-group row">
+	    	      <label for="type" class="col-sm-3 col-form-label">Document Type</label>
+            <div class="col-sm-9">
+             <select id="documentType" name="type_id" class="form-control" required>
+                <option value="">Select Type...</option>
+              @foreach($types as $type)
+                <option value={{$type->id}}>{{$type->name}}</option>
+              @endforeach
+              </select>
+              </div> 
+        </div> 
 	    <div class="form-group row">
 	    	      <label for="customer" class="col-sm-3 col-form-label">Customer</label>
             <div class="col-sm-9">
@@ -50,18 +55,13 @@
 		        <input type="text" name="part" class="form-control" id="part" value="{{$part->part_number}}" disabled>
 		        <input type="hidden" name="part_id" value="{{$part->id}}">		        
              </div> 
-        </div> 
- 	    <div class="form-group row">
-	    	      <label for="type" class="col-sm-3 col-form-label">Document Type</label>
-            <div class="col-sm-9">
-             <select name="type_id" class="form-control" required>
-                <option value="">Select Type...</option>
-              @foreach($types as $type)
-                <option value={{$type->id}}>{{$type->name}}</option>
-              @endforeach
-              </select>
-              </div> 
-        </div> 
+        </div>
+	    <div class="form-group row" id="documentNumber">
+	      <label for="document_number" class="col-sm-3 col-form-label">Document Number</label>
+	      <div class="col-sm-9">
+	        <input type="text" name="document_number" class="form-control" id="document_number" placeholder="Document Number" required>
+	      </div>
+	    </div>
  	    <div class="form-group row">
 	      <label for="type" class="col-sm-3 col-form-label">Process</label>
 		    <div class="col-sm-9">
@@ -94,7 +94,7 @@
         <div class="form-group row">
 	    	      <label for="change_description" class="col-sm-3 col-form-label">Change Description</label>
             <div class="col-sm-9">
-	            <textarea class="form-control" name="change_description" placeholder="Change Description" required></textarea>
+	            <textarea class="form-control" name="change_description" id="changeDescription" placeholder="Change Description" required></textarea>
              </div> 
         </div>     
 	    <div class="form-group row">
@@ -122,4 +122,24 @@
  	$('#files').on('click', '.removeFile', function(){
  		$(this).closest('.newFile').remove();
  	});
+
+ 	$('#documentType').change(function(){
+ 		var type_id = $(this).val();
+ 		if(type_id == 2)
+ 		{
+ 			$('#document_number').val($('#part').val()+'_');
+ 		}
+ 		else{
+ 			$('#document_number').val('');
+ 		}
+ 	});
+
+ 	$('#revision').focusout(function(){
+ 		if($(this).val()=='A')
+ 		{
+ 			$('#changeDescription').val('Initial Release');
+ 		}
+ 	});
+
+
  @endsection

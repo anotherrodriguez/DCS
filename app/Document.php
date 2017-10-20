@@ -37,7 +37,7 @@ class Document extends Model
                 $join->on('max_rev.document_id', '=', 'documents.id');
             })->join('revisions', function($join){
                 $join->on('documents.id', '=', 'revisions.document_id')->on('max_rev.rev_date', '=', 'revisions.revision_date');
-            })->select('documents.*','revisions.revision', 'revisions.id as revision_id');
+            })->select('documents.*','revisions.revision', 'revisions.id as revision_id','revisions.description');
     }
 
     function collection_document() {

@@ -110,10 +110,12 @@ class PartController extends Controller
 
         $part = new Part([
             'part_number' => $request->get('part_number'),
+            'material' => $request->get('material'),
+            'description' => $request->get('description')
         ]);
         $part->customer()->associate($customer);
         $part->save();
-        return redirect('parts')->with('status', 'success')->with('message', 'Type "'.$part->part_number.'" was added successfully.');
+        return redirect('parts')->with('status', 'success')->with('message', 'Part "'.$part->part_number.'" was added successfully.');
     }
 
     /**
@@ -138,6 +140,7 @@ class PartController extends Controller
         //
         $part = $part->with('customer')->find($part['id']);
         $part['customers'] = CustomerController::listCustomers();
+        $part['title'] = 'Parts';
         return view('forms.partEdit', $part);
     }
 
@@ -153,6 +156,8 @@ class PartController extends Controller
         //
         $part->part_number =  $request->get('part_number');
         $part->customer_id =  $request->get('customer_id');
+        $part->material = $request->get('material');
+        $part->description = $request->get('description');
         $part->save();
         return redirect('parts')->with('status', 'success')->with('message', 'Part "'.$part->part_number.'" updated successfully".');
     }

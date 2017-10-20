@@ -34,6 +34,8 @@ trait dataTables
             $columns['createUrl'] = action($this->controllerName.'Controller@create');
             if($this->controllerName === 'Document'){
             $columns['createUrl'] = action('PartController@selectPart');
+            $columns['customers'] = \App\Customer::all();
+            $columns['types'] = \App\Type::all();
             }
             return $columns;
     }

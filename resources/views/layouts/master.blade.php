@@ -6,7 +6,7 @@
         <title>DCS 2.0</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        
+        <link rel="shortcut icon" href="{{{ asset('images/favicon.png') }}}">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
 

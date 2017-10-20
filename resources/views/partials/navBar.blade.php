@@ -15,7 +15,7 @@
             <a class="nav-link" href="{{ action('DocumentController@index') }}">Documents</a>
           </li>           
            @endif
-
+    @if (Auth::check()) 
           @if($title==='Customer')
           <li class="nav-item active">
             <a class="nav-link" href="{{ action('CustomerController@index') }}">Customers <span class="sr-only">(current)</span></a>
@@ -66,7 +66,7 @@
             <a class="nav-link" href="{{ action('FileController@index') }}">Files</a>
           </li> 
            @endif
-
+      @endif
           @if($title==='Collection')
           <li class="nav-item active">
             <a class="nav-link" href="{{ action('CollectionController@index') }}">Collections <span class="sr-only"></a>
@@ -95,10 +95,50 @@
             </div>
           </li>
         </ul>
+
+
+
+        <div id="dataTableFilter" class="form-inline showFilter" style="display: none;">
+           <div class="form-inline">
+                <div>
+                 <select name="customer_id" class="form-control" id="entries">
+                  <option value="10">10</option>
+                  <option value="15" selected>15</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  </select>
+                  </div> 
+            </div>  
+ @if($title==='Document')         
+          <div class="form-inline">
+                <div>
+                 <select name="customer_id" class="form-control" id="customerFilter">
+                  <option value="allCustomers">All Customers</option>
+                  @foreach($customers as $customer)
+                    <option value="{{$customer->name}}">{{$customer->name}}</option>
+                  @endforeach
+                  </select>
+                  </div> 
+            </div>  
+
+            <div class="form-inline">
+                <div>
+                 <select name="customer_id" class="form-control" id="typeFilter">
+                  <option value="allTypes">All Types</option>
+                  @foreach($types as $type)
+                    <option value="{{$type->name}}">{{$type->name}}</option>
+                  @endforeach
+                  </select>
+                  </div> 
+            </div> 
+@endif             
+        </div>
+
         <div class="form-inline my-2 my-lg-0">
           <div class="input-group">
-            <span class="input-group-addon">
-              <i class="fa fa-search"></i>
+            <span class="input-group-addon" id="searchButton">
+              <i class="fal fa-search"></i>
             </span>
             <input id="searchInput" type="text" class="form-control" placeholder="Search" aria-label="Search">
              @if (Auth::guest())

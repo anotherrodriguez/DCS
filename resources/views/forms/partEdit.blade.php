@@ -25,10 +25,24 @@
               @endforeach
               </select>
               </div> 
-        </div>  
+        </div>
+	    <div class="form-group row">
+	     <input name="_method" type="hidden" value="PATCH">
+	      <label for="part_number" class="col-sm-3 col-form-label">Material</label>
+	      <div class="col-sm-9">
+	      	<textarea class="form-control" name="material" required>{{$material}}</textarea>
+	      </div>
+	    </div>
+	    <div class="form-group row">
+	     <input name="_method" type="hidden" value="PATCH">
+	      <label for="description" class="col-sm-3 col-form-label">Description</label>
+	      <div class="col-sm-9">
+	      	<textarea class="form-control" name="description" required>{{$description}}</textarea>
+	      </div>
+	    </div>
 	    <div class="form-group row">
 	      <div class="offset-sm-3 col-sm-9">
-	        <button type="submit" class="btn btn-primary">Add</button>
+	        <button type="submit" class="btn btn-primary">Update</button>
 	      </div>
 	    </div>
 	  </form>

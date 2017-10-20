@@ -11,11 +11,11 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 25px;
 }
-
+@media (min-width: 992px) {
 .navbar-DCS{
 	border-bottom: 1px solid #CCCCCC;
 }
-
+}
 .container-fluid{
   padding-bottom: 40px;
 }

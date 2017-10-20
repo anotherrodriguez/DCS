@@ -24,8 +24,8 @@ class DocumentController extends Controller
     public function index()
     {
         //
-       $tableColumns = ['Part', 'Document Number', 'Revision', 'Type', 'Customer'];
-       $dataColumns = ['part.part_number', 'document_number', 'revision', 'type.name', 'part.customer.name'];
+       $tableColumns = ['Document Number', 'Revision', 'Type', 'Description', 'Customer'];
+       $dataColumns = ['document_number', 'revision', 'type.name', 'description', 'part.customer.name'];
        return $this->dataTablesIndex($tableColumns, $dataColumns);
     }
 
@@ -68,8 +68,16 @@ class DocumentController extends Controller
         $document->type()->associate($type);
         $document->process()->associate($process);
 
-        $document->save();
+        try{
+            $document->save();
+        }
 
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() == '23000'){
+                return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" of type "'.$type->name.'" already exists.');
+            }
+        }
         
         $revision = new \App\Revision([
             'description' => $request->get('description'),
@@ -134,7 +142,7 @@ class DocumentController extends Controller
         
         foreach($documents as $document)
         {
-            $document['document_number'] = '<a href="'.action('RevisionController@showFile', $document['revision_id']).'">'.$document['document_number'].'</a>';
+            $document['document_number'] = '<a target="_blank" href="'.action('RevisionController@showFile', $document['revision_id']).'">'.$document['document_number'].'</a>';
             $document['revision'] = '<a href="'.action('RevisionController@show', $document['id']).'">'.$document['revision'].'</a>';            
         }
 
