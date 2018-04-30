@@ -45,6 +45,11 @@ class CustomerController extends Controller
     {
         //
         $customers = Customer::get();
+
+      $jsonFile = fopen($this->controllerName.".json", "w") or die("Unable to open file!");
+      fwrite($jsonFile, json_encode($this->dataTablesData($customers)));
+      fclose($jsonFile);
+
         return $this->dataTablesData($customers);
     }
 
@@ -73,6 +78,9 @@ class CustomerController extends Controller
             'name' => $request->get('name')
         ]);
         $customer->save();
+
+        $this->tableData();
+
         return redirect('customers')->with('status', 'success')->with('message', 'Customer "'.$customer->name.'" was added successfully.');
     }
 
@@ -114,6 +122,9 @@ class CustomerController extends Controller
         $newName = $request->get('name');
         $customer->name =  $request->get('name');
         $customer->save();
+
+        $this->tableData();
+
         return redirect('customers')->with('status', 'success')->with('message', 'Customer "'.$oldName.'" is now "'.$newName.'".');
     }
 
@@ -135,6 +146,9 @@ class CustomerController extends Controller
                 return redirect('customers')->with('status', 'danger')->with('message', 'Customer "'.$customer->name.'" is linked, cannot be deleted.');
             }
         }
+
+        $this->tableData();
+        
         return redirect('customers')->with('status', 'success')->with('message', 'Customer "'.$customer->name.'" was deleted successfully.');
     }
 

@@ -6,12 +6,13 @@ use App\Document;
 use Illuminate\Http\Request;
 use App\Traits\dataTables;
 use Illuminate\Support\Facades\Auth;
+use \Illuminate\Database\QueryException;
 
 class DocumentController extends Controller
 {
     use dataTables;
     
-    public function __construct()
+        public function __construct()
     {
         $this->setControllerName('Document');
     }    
@@ -23,9 +24,25 @@ class DocumentController extends Controller
     public function index()
     {
         //
-       $tableColumns = ['Part', 'Operation', 'Revision', 'Customer'];
-       $dataColumns = ['part.part_number', 'operation', 'revision', 'part.customer.name'];
+       $tableColumns = ['Part Number','Document Number', 'Revision', 'Type', 'Description', 'Customer'];
+       $dataColumns = ['part.part_number','document_number', 'revision', 'type.name', 'description', 'part.customer.name'];
        return $this->dataTablesIndex($tableColumns, $dataColumns);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function specification()
+    {
+        //
+       $tableColumns = ['Document Number', 'Revision', 'Description', 'Customer'];
+       $dataColumns = ['document_number', 'revision', 'description', 'part.customer.name'];
+        $columns = $this->addColumns($tableColumns, $dataColumns);
+        $columns['url'] = action($this->controllerName.'Controller@tableData');
+        $columns['title'] = 'Specification';
+        return view('dataTable', $columns);
     }
 
     /**
@@ -37,9 +54,10 @@ class DocumentController extends Controller
     {
         //
         $part =\App\Part::find($part_id);
-        $types = \App\Type::all();
-        $processes = \App\Process::all();
-        $data = ['part'=>$part, 'types'=>$types, 'processes'=>$processes];
+        $types = \App\Type::orderBy('name')->get();
+        $files = \App\File::orderBy('name')->get();
+        $processes = \App\Process::orderBy('name')->get();
+        $data = ['part'=>$part, 'types'=>$types, 'files'=>$files,'processes'=>$processes, 'title'=>'Part'];
         return view('forms.document', $data);
     }
 
@@ -53,24 +71,35 @@ class DocumentController extends Controller
     {
         //
         $files = $request->file('file');
-        $types = $request->get('type_id');
+        $fileTypes = $request->get('file_id');
         $part = \App\Part::find($request->get('part_id'));
+        $type = \App\Type::find($request->get('type_id'));
         $process = \App\Process::find($request->get('process_id'));
 
         $document = new Document([
-            'operation' =>  $request->get('operation')
+            'document_number' =>  $request->get('document_number')
             ]);
 
         $document->part()->associate($part);
+        $document->type()->associate($type);
         $document->process()->associate($process);
 
-        $document->save();
+        try{
+            $document->save();
+        }
 
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() == '23000'){
+                return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" of type "'.$type->name.'" already exists.');
+            }
+        }
+        
         $revision = new \App\Revision([
             'description' => $request->get('description'),
             'revision_date' => $request->get('revision_date'),
             'revision' => $request->get('revision'),
-            'change_description' => $request->get('change_description'),
+            'change_description' => $request->get('change_description')
         ]);
         
         $revision->document()->associate($document);
@@ -79,10 +108,11 @@ class DocumentController extends Controller
         
         $revision->save();
 
-        $this->saveFiles($files,$types,$revision);
+        $this->saveFiles($files,$fileTypes,$revision);
+
+        $this->tableData('Document');
         
-        return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->operation.'".');
-        
+        return redirect('documents')->with('status', 'success')->with('message', 'Revision "'.$revision->revision.'" was added successfully to document "'.$document->document_number.'".');
     }
 
     /**
@@ -97,10 +127,8 @@ class DocumentController extends Controller
         $tableColumns = ['Revision', 'Description', 'Change', 'Date'];
         $dataColumns = ['revision', 'description', 'change_description', 'revision_date'];
         $columns = $this->addColumns($tableColumns, $dataColumns);
-        $columns['url'] = action('DocumentController@tableDataRevisions', $document);
-        $columns['createUrl'] = url('revisions/create', $document);
+        $columns['url'] = action('DocumentController@tableData', $document);
         return view('document', $columns);
-
     }
 
     /**
@@ -109,24 +137,42 @@ class DocumentController extends Controller
      * @param  \App\Document  $document
      * @return \Illuminate\Http\Response
      */
-    public function tableDataRevisions(Document $document)
-    {
-        //
-        $this->setControllerName('Revision');
-        $revisions = $document->with('revision','part.customer', 'process')->find($document->id);
-        $revision = $this->dataTablesData($revisions['revision']);
-        $revision['summary']['operation'] = $revisions['operation'];
-        $revision['summary']['customer'] = $revisions['part']['customer']['name'];
-        $revision['summary']['process'] = $revisions['process']['name'];
-        return ['data'=>$revision['data'], 'summary'=>$revision['summary']];
-    }
-
-    public function tableData()
+    public function tableData($title)//Request $request)
     {
         //
         $documents = new Document();
-        $documents = $documents->latestRevision()->with('part.customer','process')->get();
-        return $this->dataTablesData($documents);
+
+        $documents = $documents->latestRevision()->with('part.customer','process','type')->where('type_id', '!=', '7')->get();
+        
+        foreach($documents as $document)
+        {
+            $document['document_number'] = '<a target="_blank" href="'.action('RevisionController@showFile', $document['revision_id']).'">'.$document['document_number'].'</a>';
+            $document['revision'] = '<a href="'.action('RevisionController@show', $document['id']).'">'.$document['revision'].'</a>';            
+        }
+
+
+      $jsonFile = fopen($title.".json", "w") or die("Unable to open file!");
+      fwrite($jsonFile, json_encode($this->dataTablesData($documents)));
+      fclose($jsonFile);
+
+        $documents = new Document();
+
+        $documents = $documents->latestRevision()->with('part.customer','process','type')->where('type_id', '=', '7')->get();
+
+        foreach($documents as $document)
+        {
+            $document['document_number'] = '<a target="_blank" href="'.action('RevisionController@showFile', $document['revision_id']).'">'.$document['document_number'].'</a>';
+            $document['revision'] = '<a href="'.action('RevisionController@show', $document['id']).'">'.$document['revision'].'</a>';            
+        }
+
+
+      $jsonFile = fopen("Specification.json", "w") or die("Unable to open file!");
+      fwrite($jsonFile, json_encode($this->dataTablesData($documents)));
+      fclose($jsonFile);
+
+
+       // return $this->dataTablesData($documents);
+
     }
 
     /**
@@ -138,9 +184,10 @@ class DocumentController extends Controller
     public function edit(Document $document)
     {
         //
-        $document = $document::with('part.customer','process')->find($document->id);
-        $processes = \App\Process::all();
-        $data = ['document'=>$document, 'processes'=>$processes];
+        $document = $document::with('part.customer','type','process')->find($document->id);
+        $types = \App\Type::orderBy('name')->get();
+        $processes = \App\Process::orderBy('name')->get();
+        $data = ['document'=>$document, 'types'=>$types, 'processes'=>$processes, 'title'=>'document'];
 
         return view('forms.documentEdit', $data);
     }
@@ -155,14 +202,27 @@ class DocumentController extends Controller
     public function update(Request $request, Document $document)
     {
         //
+        $type = \App\Type::find($request->get('type_id'));
         $process = \App\Process::find($request->get('process_id'));
         $document = $document->find($document->id);
 
-        $document->operation = $request->get('operation');
+        $document->document_number = $request->get('document_number');
+        $document->type()->associate($type);
         $document->process()->associate($process);
 
-        $document->save();
-        
+        try{
+            $document->save();
+        }
+
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() == '23000'){
+                return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" of type "'.$type->name.'" already exists.');
+            }
+        }
+
+        $this->tableData('Document');
+
         return redirect('documents')->with('status', 'success')->with('message', 'Document was updated successfully.');
     }
 
@@ -175,8 +235,20 @@ class DocumentController extends Controller
     public function destroy(Document $document)
     {
         //
-        $document->delete();
-        return redirect('documents')->with('status', 'success')->with('message', 'Document "'.$document->operation.'" was deleted successfully.');
+        try{
+            $document->delete();
+        }
+
+        catch(QueryException $ex){
+            //23000 Foriegn Key Exception aka already linked to another table
+            if($ex->getcode() == '23000'){
+                return redirect('documents')->with('status', 'danger')->with('message', 'Error: Document "'.$document->document_number.'" has multiple revisions.');
+            }
+        }
+        
+        $this->tableData('Document');
+
+        return redirect('documents')->with('status', 'success')->with('message', 'Document "'.$document->document_number.'" was deleted successfully.');
 
     }
 }

@@ -37,6 +37,11 @@ class TypeController extends Controller
     {
         //
         $types = Type::get();
+
+      $jsonFile = fopen($this->controllerName.".json", "w") or die("Unable to open file!");
+      fwrite($jsonFile, json_encode($this->dataTablesData($types)));
+      fclose($jsonFile);
+
         return $this->dataTablesData($types);
     }
 
@@ -65,6 +70,9 @@ class TypeController extends Controller
             'name' => $request->get('name')
         ]);
         $type->save();
+
+        $this->tableData();
+
         return redirect('types')->with('status', 'success')->with('message', 'Type "'.$type->name.'" was added successfully.');
     }
 
@@ -106,6 +114,9 @@ class TypeController extends Controller
         $newName = $request->get('name');
         $type->name =  $request->get('name');
         $type->save();
+
+        $this->tableData();
+
         return redirect('types')->with('status', 'success')->with('message', 'Type "'.$oldName.'" is now "'.$newName.'".');
     }
 
@@ -128,6 +139,8 @@ class TypeController extends Controller
             }
 
         }
+        
+        $this->tableData();
         
         return redirect('types')->with('status', 'success')->with('message', 'Type "'.$type->name.'" was deleted successfully.');
     }

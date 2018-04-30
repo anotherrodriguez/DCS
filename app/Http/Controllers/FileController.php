@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Process;
+use App\File;
 use Illuminate\Http\Request;
 use \Illuminate\Database\QueryException;
 use App\Traits\dataTables;
 
-class ProcessController extends Controller
+class FileController extends Controller
 {
     use dataTables;
 
     function __construct() 
     {
-        $this->setControllerName('Process');
+        $this->setControllerName('File');
     }
     /**
      * Display a listing of the resource.
@@ -23,10 +23,10 @@ class ProcessController extends Controller
     public function index()
     {
         //
-        $tableColumns = ['Process', 'Date Created'];
+        $tableColumns = ['File', 'Date Created'];
         $dataColumns = ['name', 'created_at'];
         return $this->dataTablesIndex($tableColumns, $dataColumns);
-    }   
+    }
 
     /**
      * Display a listing of the resource.
@@ -36,16 +36,14 @@ class ProcessController extends Controller
     public function tableData()
     {
         //
-        $this->controllerName = 'Process';
-        $processes = Process::get();
+        $files = File::get();
 
       $jsonFile = fopen($this->controllerName.".json", "w") or die("Unable to open file!");
-      fwrite($jsonFile, json_encode($this->dataTablesData($processes)));
+      fwrite($jsonFile, json_encode($this->dataTablesData($files)));
       fclose($jsonFile);
 
 
-
-        return $this->dataTablesData($processes);
+        return $this->dataTablesData($files);
     }
 
     /**
@@ -56,8 +54,8 @@ class ProcessController extends Controller
     public function create()
     {
         //
-        $title = ['title' => 'New Process'];
-        return view('forms.process', $title);
+        $title = ['title' => 'New File'];
+        return view('forms.file', $title);
     }
 
     /**
@@ -69,23 +67,23 @@ class ProcessController extends Controller
     public function store(Request $request)
     {
         //
-        $process = new Process([
+        $file = new File([
             'name' => $request->get('name')
         ]);
-        $process->save();
+        $file->save();
 
         $this->tableData();
 
-        return redirect('process')->with('status', 'success')->with('message', 'Process "'.$process->name.'" was added successfully.');
+        return redirect('files')->with('status', 'success')->with('message', 'File "'.$file->name.'" was added successfully.');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Process  $process
+     * @param  \App\File  $file
      * @return \Illuminate\Http\Response
      */
-    public function show(Process $process)
+    public function show(File $file)
     {
         //
     }
@@ -93,58 +91,58 @@ class ProcessController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Process  $process
+     * @param  \App\File  $file
      * @return \Illuminate\Http\Response
      */
-    public function edit(Process $process)
+    public function edit(File $file)
     {
         //
-        $title = ['title' => 'Edit Process'];
-        return view('forms.processEdit', $process, $title);
+        $title = ['title' => 'Edit File'];
+        return view('forms.fileEdit', $file, $title);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Process  $process
+     * @param  \App\File  $file
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Process $process)
+    public function update(Request $request, File $file)
     {
         //
-        $oldName = $process->name;
+        $oldName = $file->name;
         $newName = $request->get('name');
-        $process->name =  $request->get('name');
-        $process->save();
+        $file->name =  $request->get('name');
+        $file->save();
 
         $this->tableData();
 
-        return redirect('process')->with('status', 'success')->with('message', 'Process "'.$oldName.'" is now "'.$newName.'".');
+        return redirect('files')->with('status', 'success')->with('message', 'File "'.$oldName.'" is now "'.$newName.'".');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Process  $process
+     * @param  \App\File  $file
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Process $process)
+    public function destroy(File $file)
     {
         //
         try{
-            $process->delete();
+            $file->delete();
         }
         catch(QueryException $ex){
             //23000 Foriegn Key Exception aka already linked to another table
             if($ex->getcode() === '23000'){
-                return redirect('process')->with('status', 'danger')->with('message', 'Process "'.$process->name.'" is linked, cannot be deleted.');
+                return redirect('files')->with('status', 'danger')->with('message', 'File "'.$file->name.'" is linked, cannot be deleted.');
             }
 
         }
         
         $this->tableData();
-
-        return redirect('process')->with('status', 'success')->with('message', 'Process "'.$process->name.'" was deleted successfully.');
+        
+        return redirect('files')->with('status', 'success')->with('message', 'File "'.$file->name.'" was deleted successfully.');
     }
 }

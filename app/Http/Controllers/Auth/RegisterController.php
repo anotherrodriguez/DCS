@@ -60,12 +60,18 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\User
      */
+
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
-        ]);
+ $user = User::create([
+      'name'     => $data['name'],
+      'email'    => $data['email'],
+      'password' => bcrypt($data['password']),
+    ]);
+    $user
+       ->roles()
+       ->attach(\App\Role::where('name', 'engineer')->first());
+    return $user;
     }
+    
 }

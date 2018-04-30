@@ -62,8 +62,21 @@ class PartController extends Controller
     public function tableData()
     {
         //
+        $title=$this->controllerName;
         $parts = Part::with('customer')->get();
-        return $this->dataTablesData($parts);
+        foreach($parts as $part)
+        {
+            $part['part_number'] = '<a href="'.action('EpicorController@methodMaster', $part['part_number']).'">'.$part['part_number'].'</a>';
+            $part['select'] = '<a href="'.url('documents/create', $part['id']).'"><button type="button" class="btn btn-outline-primary">select</button></a>';
+
+            $partData[] = $part;
+        }
+
+      $jsonFile = fopen($this->controllerName.".json", "w") or die("Unable to open file!");
+      fwrite($jsonFile, json_encode($this->dataTablesData($partData)));
+      fclose($jsonFile);
+
+    // return $this->dataTablesData($partData);
 
     }
 
@@ -93,6 +106,7 @@ class PartController extends Controller
     {
         //
         $customers['customers'] = CustomerController::listCustomers();
+        $customers['title'] = 'Part';
         return view('forms.part', $customers);
     }
 
@@ -109,10 +123,15 @@ class PartController extends Controller
 
         $part = new Part([
             'part_number' => $request->get('part_number'),
+            'material' => $request->get('material'),
+            'description' => $request->get('description')
         ]);
         $part->customer()->associate($customer);
         $part->save();
-        return redirect('parts')->with('status', 'success')->with('message', 'Type "'.$part->part_number.'" was added successfully.');
+
+        $this->tableData();
+
+        return redirect('parts')->with('status', 'success')->with('message', 'Part "'.$part->part_number.'" was added successfully.');
     }
 
     /**
@@ -137,6 +156,7 @@ class PartController extends Controller
         //
         $part = $part->with('customer')->find($part['id']);
         $part['customers'] = CustomerController::listCustomers();
+        $part['title'] = 'Parts';
         return view('forms.partEdit', $part);
     }
 
@@ -152,7 +172,12 @@ class PartController extends Controller
         //
         $part->part_number =  $request->get('part_number');
         $part->customer_id =  $request->get('customer_id');
+        $part->material = $request->get('material');
+        $part->description = $request->get('description');
         $part->save();
+
+        $this->tableData();
+
         return redirect('parts')->with('status', 'success')->with('message', 'Part "'.$part->part_number.'" updated successfully".');
     }
 
@@ -176,6 +201,8 @@ class PartController extends Controller
             }
 
         }
+
+        $this->tableData();
 
         return redirect('parts')->with('status', 'success')->with('message', 'Part "'.$part->part_number.'" was deleted successfully.');
 
